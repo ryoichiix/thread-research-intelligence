@@ -11,6 +11,7 @@ import { TopNav, TopNavHeading, TopNavItem } from "@astryxdesign/core/TopNav";
 import { ArrowRight, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { HeroHeadline } from "@/components/hero-headline";
+import { LandingPreloader } from "@/components/landing-preloader";
 import { HeroThread } from "@/components/hero-thread";
 import { LandingGraph } from "@/components/landing-graph";
 
@@ -28,7 +29,7 @@ export default function LandingPage() {
       }
       endContent={
         <HStack gap={2} align="center">
-          <Button label="Open workspace" href="/dashboard" variant="primary" endContent={<ArrowRight />} />
+          <Button label="Sign in" href="/login" variant="primary" endContent={<ArrowRight />} />
         </HStack>
       }
     />
@@ -36,13 +37,13 @@ export default function LandingPage() {
 
   return (
     <AppShell topNav={topNav} height="auto" variant="surface" contentPadding={0}>
+      <LandingPreloader />
       <VStack>
         <section className="landing-hero">
           <span className="hero-blob" aria-hidden="true" />
           <VStack gap={8} align="center" className="hero-stack">
-            <HeroThread />
             <HStack gap={2} align="center">
-              <StatusDot variant="success" label="Production ready" isPulsing />
+              <StatusDot variant="accent" label="Production ready" isPulsing />
               <Text type="supporting" color="secondary">RESEARCH INTELLIGENCE, NOT ANOTHER NOTE APP</Text>
             </HStack>
             <VStack gap={5} align="center" maxWidth="1000px">
@@ -96,6 +97,19 @@ export default function LandingPage() {
                 </li>
               ))}
             </ol>
+          </VStack>
+        </section>
+
+        <section className="landing-section landing-mark" aria-label="How THREAD connects your research">
+          <VStack gap={6} align="center">
+            <HeroThread />
+            <VStack gap={3} align="center" maxWidth="620px">
+              <Heading level={2} type="display-3" justify="center">One thread through everything you read.</Heading>
+              <Text className="section-copy" justify="center">
+                Every source, claim, and contradiction stays tied to the question that prompted it — so the
+                reasoning behind a conclusion is always one hop away.
+              </Text>
+            </VStack>
           </VStack>
         </section>
 

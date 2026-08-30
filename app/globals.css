@@ -3803,7 +3803,7 @@
 /*
  * Dashboard structure pass: individual stat cards, and a readiness gauge that says what it
  * measures. Spacing and structure only — every colour here is an existing token, and the
- * emerald accent stays reserved for things the user can act on (the gauge fill is progress
+ * brand accent stays reserved for things the user can act on (the gauge fill is progress
  * toward a goal, which is why it earns the accent; the stat numbers do not).
  */
 @layer system {
@@ -3896,7 +3896,7 @@
  * Landing hero centerpiece, plus the decorative-colour audit.
  *
  * The brass tone below is the one complementary accent in the system. It is reserved for the
- * page kicker/eyebrow line and nothing else: the emerald stays the action colour, and the
+ * page kicker/eyebrow line and nothing else: the brand accent stays the action colour, and the
  * green/red status badges stay semantic and untouched.
  */
 @layer system {
@@ -4268,5 +4268,107 @@
   .astryx-side-nav:not(:has(.sidebar-account)) > :last-child {
     margin-inline: var(--spacing-3);
     border-top: var(--border-width) solid var(--color-border);
+  }
+}
+
+/*
+ * FIX 3 — landing entrance, and the section the hero diagram moved into.
+ */
+@layer system {
+  .preloader {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--color-background-body);
+    animation: preloader-in var(--duration-fast) var(--ease-standard);
+  }
+
+  .preloader[data-state="leaving"] {
+    pointer-events: none;
+    animation: preloader-out 420ms var(--ease-standard) forwards;
+  }
+
+  /* Soft accent glow, the same atmospheric treatment the hero uses. */
+  .preloader-glow {
+    position: absolute;
+    width: min(90vw, calc(var(--spacing-12) * 12));
+    aspect-ratio: 1;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 62%);
+    filter: blur(calc(var(--spacing-12) * 1.5));
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .preloader-mark {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+    animation: preloader-mark-in var(--duration-medium) var(--ease-standard) backwards;
+  }
+
+  .preloader-mark .brand-mark {
+    width: var(--spacing-12);
+    height: var(--spacing-12);
+    color: var(--color-text-primary);
+  }
+
+  .preloader-wordmark {
+    color: var(--color-text-primary);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+  }
+
+  .preloader-skip {
+    position: absolute;
+    inset-block-end: var(--spacing-8);
+    inset-inline-end: var(--spacing-8);
+    padding: var(--spacing-2) var(--spacing-3);
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+
+  .preloader-skip:hover {
+    color: var(--color-text-primary);
+  }
+
+  @keyframes preloader-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Lifts away rather than cutting: the panel fades while scaling just past the viewport. */
+  @keyframes preloader-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.04); }
+  }
+
+  @keyframes preloader-mark-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* The relocated mark, with the room it did not have in the hero. */
+  .landing-mark {
+    text-align: center;
+  }
+
+  .landing-mark .hero-thread {
+    width: min(100%, calc(var(--spacing-12) * 10));
+    margin-inline: auto;
   }
 }
