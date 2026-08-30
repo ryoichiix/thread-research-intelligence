@@ -1,0 +1,15 @@
+node_modules
+.next
+dist
+.wrangler
+.vinext
+.vercel
+work
+.env
+.env.local
+coverage
+apps/extension/dist
+apps/extension/thread-extension.zip
+*.tsbuildinfo
+.DS_Store
+.thread/

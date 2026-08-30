@@ -1,0 +1,9 @@
+delete from public.timeline_events where is_demo = true;
+delete from public.conflicts where is_demo = true;
+delete from public.research_tasks where is_demo = true;
+delete from public.research_gaps where is_demo = true;
+delete from public.insights where is_demo = true;
+delete from public.claims where is_demo = true;
+delete from public.evidence where is_demo = true;
+delete from public.sources where is_demo = true;
+delete from public.projects where is_demo = true;

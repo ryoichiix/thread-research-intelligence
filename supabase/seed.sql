@@ -1,0 +1,2 @@
+-- Production intentionally starts empty. Create projects through the authenticated application.
+-- Production data should be created through authenticated APIs so ownership and RLS remain intact.
