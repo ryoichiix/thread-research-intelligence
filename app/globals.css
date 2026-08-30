@@ -3446,3 +3446,42 @@
     }
   }
 }
+
+/*
+ * Step 2 — information architecture.
+ * The Evidence section's three lenses share one tab strip, and the top nav grows a command
+ * palette trigger. Same `system` layer as the detail panel block so these win over the
+ * earlier design passes without editing them.
+ */
+@layer system {
+  .section-tabs {
+    position: sticky;
+    z-index: 5;
+    top: 0;
+    margin-block-end: var(--spacing-5);
+    padding-block-start: var(--spacing-1);
+    background: var(--color-background-body);
+  }
+
+  .top-search-action {
+    /* Holds the trigger wide enough that the shortcut hint never collides with the label. */
+    min-width: calc(var(--spacing-12) * 3);
+    justify-content: space-between;
+    color: var(--color-text-secondary);
+  }
+
+  .top-search-action .astryx-kbd {
+    opacity: 0.75;
+  }
+
+  @media (max-width: 900px) {
+    /* The palette is still reachable on ⌘K; the hint is the first thing to go. */
+    .top-search-action .astryx-kbd {
+      display: none;
+    }
+
+    .top-search-action {
+      min-width: 0;
+    }
+  }
+}

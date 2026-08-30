@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AppShell } from "@astryxdesign/core/AppShell";
 import { Button } from "@astryxdesign/core/Button";
 import { IconButton } from "@astryxdesign/core/IconButton";
+import { Kbd } from "@astryxdesign/core/Kbd";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -13,26 +14,30 @@ import { TopNav } from "@astryxdesign/core/TopNav";
 import {
   Activity,
   BookOpen,
-  CircleHelp,
   Compass,
   GitFork,
   LayoutDashboard,
+  Search,
   Settings,
-  ShieldAlert,
   LogOut,
   Target,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
+import { ThreadCommandPalette } from "@/components/command-palette";
+import { EVIDENCE_SECTION_HREF, EVIDENCE_ROUTES } from "@/components/evidence-tabs";
 import type { Project } from "@thread/shared";
 
-const navigation = [
+/*
+ * Evidence collapses the old Evidence map / Contradictions / Knowledge gaps entries into one
+ * destination; the three lenses are tabs inside it (see components/evidence-tabs.tsx), so
+ * `matches` keeps the sidebar entry lit on any of their routes.
+ */
+const navigation: Array<{ title: string; items: Array<{ href: string; label: string; icon: typeof LayoutDashboard; matches?: string[] }> }> = [
   {
     title: "Workspace",
     items: [
       { href: "/dashboard", label: "Research brief", icon: LayoutDashboard },
-      { href: "/graph", label: "Evidence map", icon: GitFork },
-      { href: "/conflicts", label: "Contradictions", icon: ShieldAlert },
-      { href: "/gaps", label: "Knowledge gaps", icon: CircleHelp },
+      { href: EVIDENCE_SECTION_HREF, label: "Evidence", icon: GitFork, matches: EVIDENCE_ROUTES },
     ],
   },
   {
@@ -49,6 +54,7 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
   const pathname = usePathname();
   const router = useRouter();
   const [switchingProject, setSwitchingProject] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [shellError, setShellError] = useState("");
   const activeProject = projects.find((project) => project.id === activeProjectId);
 
@@ -135,7 +141,7 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
         <SideNavSection title={group.title} key={group.title}>
           {group.items.map((item) => {
             const Icon = item.icon;
-            const selected = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const selected = (item.matches ?? [item.href]).some((href) => pathname === href || pathname.startsWith(`${href}/`));
             return (
               <SideNavItem
                 key={item.href}
@@ -181,6 +187,15 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
       }
       endContent={
         <HStack gap={3} align="center">
+          <Button
+            className="top-search-action"
+            label="Search"
+            variant="secondary"
+            size="sm"
+            icon={<Search />}
+            onClick={() => setIsPaletteOpen(true)}
+            endContent={<Kbd keys="mod+K" />}
+          />
           {email ? <Text type="supporting" color="secondary" className="workspace-account">{email}</Text> : null}
           <Button className="top-new-action" label="New paper" href="/onboarding" variant="primary" size="sm" icon={<Target />} />
         </HStack>
@@ -191,6 +206,13 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
   return (
     <AppShell topNav={topNav} sideNav={sideNav} height="fill" variant="section" contentPadding={0} mobileNav={{ breakpoint: "md" }}>
       <section className="thread-main">{children}</section>
+      <ThreadCommandPalette
+        isOpen={isPaletteOpen}
+        onOpenChange={setIsPaletteOpen}
+        projects={projects}
+        activeProjectId={activeProjectId}
+        onSelectProject={changeProject}
+      />
     </AppShell>
   );
 }
