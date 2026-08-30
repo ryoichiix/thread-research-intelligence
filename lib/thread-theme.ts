@@ -3,25 +3,28 @@ import { defineTheme } from "@astryxdesign/core/theme";
 export const threadStudioTheme = defineTheme({
   name: "thread-studio",
   color: {
-    accent: "#8C1F35", // deep garnet — single hex since this is light-only, no [light, dark] tuple needed
+    accent: "#1D6B4C",
     neutralStyle: "cool",
     contrast: "high",
   },
   tokens: {
-    // Single-scheme theme: both entries in each tuple are intentionally identical, so the
-    // result is the same regardless of any ambient data-theme/mode setting — this guarantees
-    // light-only behavior even if something upstream still requests dark.
-    "--color-background-body": ["#F7F5EF", "#F7F5EF"],
+    // IMPORTANT: --color-accent is set explicitly here, not left to color.accent alone.
+    // color.accent is only a seed the system can nudge for contrast — verify after building that
+    // getComputedStyle(document.documentElement).getPropertyValue('--color-accent') actually
+    // returns #1D6B4C and not some auto-adjusted nearby shade. If it doesn't match exactly, that
+    // is a blocking problem, not a cosmetic one — stop and fix it before moving on.
+    "--color-accent": ["#1D6B4C", "#1D6B4C"],
+    "--color-background-body": ["#FCFCFA", "#FCFCFA"],
     "--color-background-surface": ["#FFFFFF", "#FFFFFF"],
     "--color-background-card": ["#FFFFFF", "#FFFFFF"],
     "--color-background-popover": ["#FFFFFF", "#FFFFFF"],
-    "--color-background-muted": ["#EDE8DA", "#EDE8DA"],
-    "--color-text-primary": ["#1C1B22", "#1C1B22"],
-    "--color-text-secondary": ["#6B6860", "#6B6860"],
-    "--color-text-disabled": ["#A39C8C", "#A39C8C"],
-    "--color-border": ["#E3DFD1", "#E3DFD1"],
-    "--color-border-emphasized": ["#C7BFA8", "#C7BFA8"],
-    "--color-track": ["#E7E1D0", "#E7E1D0"],
+    "--color-background-muted": ["#EEF0EA", "#EEF0EA"],
+    "--color-text-primary": ["#13201A", "#13201A"],
+    "--color-text-secondary": ["#59695F", "#59695F"],
+    "--color-text-disabled": ["#9AA79D", "#9AA79D"],
+    "--color-border": ["#E2E6DD", "#E2E6DD"],
+    "--color-border-emphasized": ["#B7C2B0", "#B7C2B0"],
+    "--color-track": ["#E5E8DF", "#E5E8DF"],
   },
   typography: {
     scale: { base: 15, ratio: 1.2 },
@@ -34,7 +37,7 @@ export const threadStudioTheme = defineTheme({
     },
     code: { family: "Geist Mono", fallbacks: "SFMono-Regular, ui-monospace, monospace" },
   },
-  radius: { base: 10, multiplier: 1.3 }, // was base:3, multiplier:0.8 — this is why buttons looked "old-generation square"
+  radius: { base: 10, multiplier: 1.3 },
   motion: { fast: 110, medium: 220, slow: 420, ratio: 0.7 },
   components: {
     button: {
