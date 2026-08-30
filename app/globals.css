@@ -3305,12 +3305,26 @@
     border-inline-start: var(--border-width) solid var(--color-border-emphasized);
     background: var(--color-background-popover);
     box-shadow: var(--shadow-high);
-    /*
-     * Deliberately no fill-mode: a resting transform on this element would make it the
-     * containing block for any position: fixed descendant, which is the bug this panel
-     * was moved out of .page-frame to escape.
-     */
+    /* Rounded only on the leading edge; the panel stays flush with the viewport's other three. */
+    border-start-start-radius: var(--radius-page);
+    border-end-start-radius: var(--radius-page);
+  }
+
+  /*
+   * The shell slides straight in with the standard curve and never overshoots, so the drawer
+   * cannot momentarily pull away from the viewport edge and expose a sliver of scrim. The
+   * spring lives on the content groups below, where an overshoot reads as bounce, not a gap.
+   * No fill-mode: a resting transform here would make the panel a containing block for any
+   * position: fixed descendant, which is the bug this panel was portalled out of .page-frame
+   * to escape in the first place.
+   */
+  .detail-panel[data-state="open"] {
     animation: detail-panel-in var(--duration-medium) var(--ease-standard);
+  }
+
+  .detail-panel[data-state="closing"] {
+    pointer-events: none;
+    animation: detail-panel-out var(--duration-fast) var(--ease-standard) forwards;
   }
 
   .detail-panel[data-size="lg"] {
@@ -3318,8 +3332,22 @@
   }
 
   .detail-scrim {
-    background: var(--color-overlay);
+    /*
+     * Softened because the blur now carries most of the separation on its own.
+     * backdrop-filter makes this element a containing block for its own descendants, which is
+     * harmless here: the scrim has no children, and the panel is its sibling, not its child.
+     */
+    background: color-mix(in srgb, var(--color-overlay) 76%, transparent);
+    backdrop-filter: blur(var(--spacing-1-5));
+  }
+
+  .detail-scrim[data-state="open"] {
     animation: detail-scrim-in var(--duration-fast) var(--ease-standard);
+  }
+
+  .detail-scrim[data-state="closing"] {
+    pointer-events: none;
+    animation: detail-scrim-out var(--duration-fast) var(--ease-standard) forwards;
   }
 
   .detail-panel-header,
@@ -3416,9 +3444,19 @@
     to { opacity: 1; transform: translateX(0); }
   }
 
+  @keyframes detail-panel-out {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(var(--spacing-8)); }
+  }
+
   @keyframes detail-scrim-in {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+
+  @keyframes detail-scrim-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   @media (max-width: 720px) {
@@ -3437,7 +3475,14 @@
 
   @media (prefers-reduced-motion: reduce) {
     .detail-panel,
-    .detail-scrim {
+    .detail-scrim,
+    .detail-panel[data-state="open"],
+    .detail-panel[data-state="closing"],
+    .detail-scrim[data-state="open"],
+    .detail-scrim[data-state="closing"],
+    .detail-panel-header,
+    .detail-panel-summary,
+    .detail-panel-body {
       animation: none;
     }
 
@@ -3482,6 +3527,83 @@
 
     .top-search-action {
       min-width: 0;
+    }
+  }
+}
+
+/*
+ * Step 3 — detail panel visual pass.
+ * The structural fix (portal to document.body, scroll lock, shared component) is unchanged;
+ * this adds the spring settle on the panel's content groups and the typographic hierarchy.
+ */
+@layer system {
+  :root {
+    /*
+     * The design system ships one easing token (--ease-standard) and it does not overshoot.
+     * This is the project's spring companion to it, named rather than inlined so the same
+     * curve is reusable and reviewable. Used only where an overshoot cannot open a visual
+     * gap — interior content, never the drawer's own edge-anchored shell.
+     */
+    --thread-ease-spring: cubic-bezier(0.22, 1.28, 0.36, 1);
+  }
+
+  /*
+   * Content settles in just behind the shell, so the eye lands on the title, then the answer,
+   * then the supporting detail. Short and staggered, never long enough to delay interaction.
+   */
+  .detail-panel[data-state="open"] .detail-panel-header,
+  .detail-panel[data-state="open"] .detail-panel-summary,
+  .detail-panel[data-state="open"] .detail-panel-body {
+    /*
+     * `backwards`, never `both`: the fill has to cover the stagger delay, but a forwards fill
+     * would leave a resting transform on these wrappers and make them containing blocks for
+     * any future position: fixed descendant — the very bug this panel was fixed for.
+     */
+    animation: detail-content-settle var(--duration-medium-min) var(--thread-ease-spring) backwards;
+  }
+
+  .detail-panel[data-state="open"] .detail-panel-summary {
+    animation-delay: 60ms;
+  }
+
+  .detail-panel[data-state="open"] .detail-panel-body {
+    animation-delay: 110ms;
+  }
+
+  /* Typographic hierarchy: kicker, then title, then the answer, each a clear step down. */
+  .detail-panel-eyebrow {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--spacing-0-5);
+  }
+
+  .detail-panel-header .astryx-heading {
+    font-size: var(--font-size-xl);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .detail-panel-summary {
+    font-size: var(--font-size-lg);
+    line-height: 1.5;
+  }
+
+  .detail-panel-body .astryx-heading {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  @keyframes detail-content-settle {
+    from { opacity: 0; transform: translateY(var(--spacing-2)); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .detail-panel[data-state="open"] .detail-panel-header,
+    .detail-panel[data-state="open"] .detail-panel-summary,
+    .detail-panel[data-state="open"] .detail-panel-body {
+      animation: none;
     }
   }
 }
