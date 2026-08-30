@@ -208,9 +208,13 @@ export function DashboardClient({
       {/* Compact eyebrow/meta zone: it introduces the title, it is not a section of its own. */}
       <Section paddingInline={8} paddingBlockStart={4} paddingBlockEnd={6} dividers={["bottom"]}>
         <VStack gap={5}>
+          {/*
+            * The current-page crumb is dropped here: "Research brief" is already the highlighted
+            * sidebar item, and the H1 below carries the project. The group crumb stays so the
+            * page keeps the same location slot as every other destination.
+            */}
           <Breadcrumbs variant="supporting" label="Research brief location">
-            <BreadcrumbItem>Workspace</BreadcrumbItem>
-            <BreadcrumbItem isCurrent>Research brief</BreadcrumbItem>
+            <BreadcrumbItem isCurrent>Workspace</BreadcrumbItem>
           </Breadcrumbs>
           {/*
             * Stats stay stacked under the title rather than sitting inline beside it: five cards
@@ -223,7 +227,7 @@ export function DashboardClient({
           <HStack justify="between" align="start" gap={6} wrap="wrap">
             <VStack gap={1} maxWidth="820px">
               <HStack gap={3} align="center" wrap="wrap" className="workbench-meta-row">
-                <Text type="supporting" weight="semibold" className="workbench-kicker workbench-kicker-brand">WORKING PAPER</Text>
+                <Text type="supporting" weight="semibold" className="workbench-kicker">WORKING PAPER</Text>
                 <Text type="supporting" color="secondary">FILE {summary.project.id.slice(0, 8).toUpperCase()}</Text>
                 <Text type="supporting" color="secondary">UPDATED {updatedLabel.toUpperCase()}</Text>
               </HStack>
@@ -274,13 +278,13 @@ export function DashboardClient({
         * measure, shows the score against its 100-point scale on a gauge, and keeps the
         * "what it is scored against" line and the limiting factor visible without a hover.
         */}
-      <Section variant="muted" paddingInline={6} paddingBlock={8} dividers={["bottom"]}>
+      <Section className="readiness-band" variant="transparent" paddingInline={6} paddingBlock={8}>
         <HStack justify="between" align="end" gap={6} wrap="wrap" className="workbench-condition">
           <VStack gap={2} className="readiness-block">
             <HStack gap={2} align="center" wrap="wrap">
               <Text weight="semibold">Research readiness</Text>
               {/* The stage reads as a status chip now, not loose text beside a dot. */}
-              <Badge label={readinessLabels[summary.health.stage]} variant={summary.health.isComplete ? "green" : "yellow"} />
+              <Badge className="readiness-stage" label={readinessLabels[summary.health.stage]} variant={summary.health.isComplete ? "green" : "yellow"} />
             </HStack>
             <HStack gap={3} align="center">
               <Text className="readiness-score">{summary.health.overall}<span className="readiness-score-max">/100</span></Text>

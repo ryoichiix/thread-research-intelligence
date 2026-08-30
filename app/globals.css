@@ -3900,10 +3900,6 @@
  * green/red status badges stay semantic and untouched.
  */
 @layer system {
-  :root {
-    --thread-brass: #9A7B3F;
-  }
-
   .hero-thread {
     width: min(100%, calc(var(--spacing-12) * 9));
     margin-inline: auto;
@@ -3986,16 +3982,6 @@
   .landing-graph {
     background-image:
       radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) var(--border-width), transparent var(--border-width));
-  }
-
-  /*
-   * FIX 5b — the single reserved use of the brass tone: the document-identity kicker on the
-   * research brief header. Deliberately not .page-eyebrow or .workbench-kicker at large — those
-   * classes repeat on every section label and on pages outside this pass, and a second colour
-   * appearing seven times is a palette, not a highlight.
-   */
-  .workbench-kicker-brand {
-    color: var(--thread-brass);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -4208,5 +4194,79 @@
       filter: none;
       opacity: 1;
     }
+  }
+}
+
+/*
+ * FIX 1b / FIX 3 — status chip and readiness band shape.
+ */
+@layer system {
+  /*
+   * The stage chip already carried the right tint and text from its semantic variant but had no
+   * border, so it read as coloured text on a wash rather than a bordered chip.
+   */
+  .readiness-stage {
+    border-width: var(--border-width);
+    border-style: solid;
+  }
+
+  .readiness-stage[data-variant="yellow"] {
+    border-color: color-mix(in srgb, var(--color-border-yellow) 45%, transparent);
+  }
+
+  .readiness-stage[data-variant="green"] {
+    border-color: color-mix(in srgb, var(--color-border-green) 45%, transparent);
+  }
+
+  /*
+   * The band was a full-bleed muted slab cutting across the page. Same radius as the stat cards,
+   * a much lighter tint, a real border, and inset from the page edges so it sits among the cards
+   * rather than dividing them. Content and internal layout are untouched.
+   */
+  .readiness-band {
+    margin-inline: var(--spacing-8);
+    margin-block: var(--spacing-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-element);
+    background: color-mix(in srgb, var(--color-accent) 4%, var(--color-background-card));
+  }
+
+  @media (max-width: 720px) {
+    .readiness-band {
+      margin-inline: var(--spacing-4);
+    }
+  }
+}
+
+/*
+ * FIX 2 — sidebar footer zone.
+ *
+ * No stretched or padded-out nav items: the dead space stays, but the bottom of the rail now
+ * terminates deliberately instead of trailing off. The icon bar is the side nav's last child and
+ * carries only StyleX hashes, so it is addressed positionally.
+ */
+@layer system {
+  .sidebar-account {
+    margin-inline: var(--spacing-3);
+    padding-block: var(--spacing-3);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .sidebar-account-label {
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--spacing-0-5);
+    text-transform: uppercase;
+  }
+
+  /* The utility row: real padding, and lifted off the absolute bottom edge. */
+  .astryx-side-nav > :last-child {
+    padding: var(--spacing-2) var(--spacing-3);
+    margin-block-end: var(--spacing-3);
+  }
+
+  /* When there is no account line, the divider belongs on the icon row itself. */
+  .astryx-side-nav:not(:has(.sidebar-account)) > :last-child {
+    margin-inline: var(--spacing-3);
+    border-top: var(--border-width) solid var(--color-border);
   }
 }

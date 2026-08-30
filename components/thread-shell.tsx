@@ -135,6 +135,14 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
           headingHref="/dashboard"
         />
       }
+      footer={
+        email ? (
+          <VStack gap={0} className="sidebar-account">
+            <Text type="supporting" color="secondary" className="sidebar-account-label">SIGNED IN</Text>
+            <Text type="supporting" weight="semibold" maxLines={1}>{email}</Text>
+          </VStack>
+        ) : null
+      }
       footerIcons={
         <>
           <IconButton label="Open settings" tooltip="Settings" variant="ghost" icon={<Settings />} onClick={() => router.push("/settings")} />
@@ -217,7 +225,6 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
             onClick={() => setIsPaletteOpen(true)}
             endContent={<Kbd keys="mod+K" />}
           />
-          {email ? <Text type="supporting" color="secondary" className="workspace-account">{email}</Text> : null}
           <Button className="top-new-action" label="New paper" href="/onboarding" variant="primary" size="sm" icon={<Target />} />
         </HStack>
       }
