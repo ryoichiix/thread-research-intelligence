@@ -59,9 +59,18 @@ export const threadStudioTheme = defineTheme({
     "side-nav": { base: { backgroundColor: "var(--color-background-surface)", borderColor: "var(--color-border)" } },
     "side-nav-heading": { base: { color: "var(--color-text-disabled)", fontFamily: "var(--font-family-code)", letterSpacing: "0.08em" } },
     "side-nav-item": {
-      base: { borderRadius: "var(--radius-element)", transition: "background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease" },
+      base: {
+        borderRadius: "var(--radius-element)",
+        // Comfortable click target; --spacing-3/-4 are the scale steps nearest the 12/14px target.
+        padding: "var(--spacing-3) var(--spacing-4)",
+        transition: "background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease",
+        // Each row is its own rounded rectangle, not a bare text row.
+        ":hover": { backgroundColor: "var(--color-background-muted)" },
+      },
       selected: { backgroundColor: "var(--color-accent-muted)", color: "var(--color-text-accent)", boxShadow: "inset 3px 0 0 var(--color-accent)", fontWeight: "var(--font-weight-semibold)" },
     },
+    // Group blocks sit roughly twice as far apart as the items inside them.
+    "side-nav-section": { base: { marginBlockStart: "var(--spacing-6)" } },
     selector: { base: { borderRadius: "var(--radius-element)" } },
     "top-nav": { base: { backgroundColor: "var(--color-background-surface)", borderColor: "var(--color-border)" } },
   },

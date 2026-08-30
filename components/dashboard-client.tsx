@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@astryxdesign/core/Badge";
+import { Card } from "@astryxdesign/core/Card";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -15,7 +16,7 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { ArrowRight, Download, GitFork, Search, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Download, FileText, FlaskConical, GitFork, Search, SearchX, Sparkles } from "lucide-react";
 import type { DashboardSummary, Evidence, Insight, TimelineEvent } from "@thread/shared";
 import { DetailPanel } from "@/components/detail-panel";
 
@@ -204,15 +205,16 @@ export function DashboardClient({
 
   return (
     <VStack gap={0} className="research-workbench">
-      <Section padding={6} dividers={["bottom"]}>
-        <VStack gap={6}>
+      {/* Compact eyebrow/meta zone: it introduces the title, it is not a section of its own. */}
+      <Section paddingInline={6} paddingBlockStart={3} paddingBlockEnd={5} dividers={["bottom"]}>
+        <VStack gap={5}>
           <Breadcrumbs variant="supporting" label="Research brief location">
             <BreadcrumbItem>Workspace</BreadcrumbItem>
             <BreadcrumbItem isCurrent>Research brief</BreadcrumbItem>
           </Breadcrumbs>
           <HStack justify="between" align="start" gap={6} wrap="wrap">
-            <VStack gap={2} maxWidth="820px">
-              <HStack gap={3} align="center" wrap="wrap">
+            <VStack gap={1} maxWidth="820px">
+              <HStack gap={3} align="center" wrap="wrap" className="workbench-meta-row">
                 <Text type="supporting" weight="semibold" className="workbench-kicker">WORKING PAPER</Text>
                 <Text type="supporting" color="secondary">FILE {summary.project.id.slice(0, 8).toUpperCase()}</Text>
                 <Text type="supporting" color="secondary">UPDATED {updatedLabel.toUpperCase()}</Text>
@@ -227,36 +229,63 @@ export function DashboardClient({
             </HStack>
           </HStack>
 
-          <HStack gap={0} className="workbench-facts" wrap="wrap" aria-label="Research inventory">
-            {[
-              [summary.counts.sources, "Sources"],
-              [summary.counts.evidence, "Evidence"],
-              [summary.counts.claims, "Claims"],
-              [summary.counts.conflicts, "Contradictions"],
-              [summary.counts.gaps, "Open gaps"],
-            ].map(([value, label]) => (
-              <VStack gap={1} className="workbench-fact" key={label}>
-                <Text className="workbench-fact-value">{value}</Text>
-                <Text type="supporting" color="secondary">{label}</Text>
-              </VStack>
+          {/*
+            * Five separate cards rather than one divided container: these are independent
+            * counts, not parts of a whole, so they should not share a bounding box. Only
+            * Contradictions takes a tone, and only when there is actually something to resolve —
+            * colouring all five would make the signal meaningless.
+            */}
+          <Grid columns={{ minWidth: 150, max: 5, repeat: "fit" }} gap={3} aria-label="Research inventory">
+            {([
+              { label: "Sources", value: summary.counts.sources, icon: <FileText /> },
+              { label: "Evidence", value: summary.counts.evidence, icon: <FlaskConical /> },
+              { label: "Claims", value: summary.counts.claims, icon: <CheckCircle2 /> },
+              { label: "Contradictions", value: summary.counts.conflicts, icon: <AlertTriangle />, tone: summary.counts.conflicts > 0 ? "warning" : undefined },
+              { label: "Open gaps", value: summary.counts.gaps, icon: <SearchX /> },
+            ] satisfies Array<{ label: string; value: number; icon: React.ReactNode; tone?: "warning" }>).map((stat) => (
+              <Card key={stat.label} padding={4} className="stat-card" data-tone={stat.tone}>
+                <VStack gap={2}>
+                  <span className="stat-card-icon" aria-hidden="true">{stat.icon}</span>
+                  <VStack gap={0}>
+                    <Text className="stat-card-value">{stat.value}</Text>
+                    <Text type="supporting" color="secondary">{stat.label}</Text>
+                  </VStack>
+                </VStack>
+              </Card>
             ))}
-          </HStack>
+          </Grid>
         </VStack>
       </Section>
 
+      {/*
+        * The old band showed a bare "26" next to a stage word, which told the reader nothing
+        * about what was being measured or what the number was out of. Now the block names the
+        * measure, shows the score against its 100-point scale on a gauge, and keeps the
+        * "what it is scored against" line and the limiting factor visible without a hover.
+        */}
       <Section variant="muted" padding={5} dividers={["bottom"]}>
-        <HStack justify="between" align="center" gap={6} wrap="wrap" className="workbench-condition">
-          <HStack gap={4} align="center">
-            <Text className="workbench-score">{summary.health.overall}</Text>
-            <VStack gap={1}>
-              <HStack gap={2} align="center">
-                <StatusDot variant={summary.health.isComplete ? "success" : "warning"} label={readinessLabels[summary.health.stage]} />
-                <Text weight="semibold">{readinessLabels[summary.health.stage]}</Text>
-              </HStack>
-              <Text color="secondary">Research condition · scored against review-readiness gates</Text>
-            </VStack>
-          </HStack>
-          <HStack gap={5} align="center" wrap="wrap">
+        <HStack justify="between" align="end" gap={6} wrap="wrap" className="workbench-condition">
+          <VStack gap={2} className="readiness-block">
+            <HStack gap={2} align="center" wrap="wrap">
+              <Text weight="semibold">Research readiness</Text>
+              <StatusDot variant={summary.health.isComplete ? "success" : "warning"} label={readinessLabels[summary.health.stage]} />
+              <Text type="supporting" color="secondary">{readinessLabels[summary.health.stage]}</Text>
+            </HStack>
+            <HStack gap={3} align="center">
+              <Text className="readiness-score">{summary.health.overall}<span className="readiness-score-max">/100</span></Text>
+              <span className="readiness-gauge">
+                <ProgressBar
+                  label={`Research readiness ${summary.health.overall} out of 100`}
+                  isLabelHidden
+                  value={summary.health.overall}
+                  max={100}
+                  variant="accent"
+                />
+              </span>
+            </HStack>
+            <Text type="supporting" color="secondary">Scored against review-readiness gates: evidence coverage, source quality, agreement, and resolved contradictions.</Text>
+          </VStack>
+          <HStack gap={5} align="end" wrap="wrap">
             <VStack gap={1} maxWidth="360px">
               <Text type="supporting" color="secondary" className="workbench-kicker">LIMITING FACTOR</Text>
               <Text weight="semibold">{weakestHealth[0]} · {weakestHealth[1]}%</Text>
@@ -286,17 +315,22 @@ export function DashboardClient({
                         onClick={() => setSelectedInsight(insight)}
                         startContent={<Text className="workbench-row-index">{String(index + 1).padStart(2, "0")}</Text>}
                         description={
-                          <VStack gap={2}>
-                            <Badge label={style.label} variant={style.variant} />
+                          /*
+                           * The badge sat as a direct child of a stretching VStack, so it filled
+                           * the row and read as a proportional bar across a shared scale. These
+                           * are independent items with independent confidence, so the badge now
+                           * hugs its label inside an HStack and confidence stays a small
+                           * neutral metric beside it.
+                           */
+                          <VStack gap={1}>
+                            <HStack gap={2} align="center" wrap="wrap">
+                              <Badge label={style.label} variant={style.variant} />
+                              <Text type="supporting" color="secondary">{Math.round(insight.confidence * 100)}% confidence</Text>
+                            </HStack>
                             <Text color="secondary" maxLines={2}>{insight.description}</Text>
                           </VStack>
                         }
-                        endContent={
-                          <HStack gap={2} align="center">
-                            <Text type="supporting" color="secondary">{Math.round(insight.confidence * 100)}%</Text>
-                            <ArrowRight />
-                          </HStack>
-                        }
+                        endContent={<ArrowRight />}
                       />
                     );
                   })}

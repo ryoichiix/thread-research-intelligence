@@ -344,7 +344,12 @@
 
   .astryx-side-nav-item {
     border-radius: var(--radius-element);
+    padding: var(--spacing-3) var(--spacing-4);
     transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  }
+
+  .astryx-side-nav-item:hover:where(:not(:disabled,[aria-disabled="true"])) {
+    background-color: var(--color-background-muted);
   }
 
   .astryx-side-nav-item.selected {
@@ -352,6 +357,10 @@
     color: var(--color-text-accent);
     box-shadow: inset 3px 0 0 var(--color-accent);
     font-weight: var(--font-weight-semibold);
+  }
+
+  .astryx-side-nav-section {
+    margin-block-start: var(--spacing-6);
   }
 
   .astryx-selector {

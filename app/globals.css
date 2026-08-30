@@ -3786,25 +3786,6 @@
     border-bottom: 0;
   }
 
-  /* The dashboard's inventory strip is the same object as SummaryBand, so it reads the same. */
-  .workbench-facts {
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-container);
-    overflow: hidden;
-    background: var(--color-background-surface);
-    box-shadow: var(--shadow-low);
-  }
-
-  .workbench-fact {
-    flex: 1 1 calc(var(--spacing-12) * 3);
-    padding: var(--spacing-4) var(--spacing-5);
-    border-inline-start: var(--border-width) solid var(--color-border);
-  }
-
-  .workbench-fact:first-child {
-    border-inline-start: 0;
-  }
-
   .workbench-fact-value {
     font-family: var(--font-family-code);
     font-size: var(--font-size-3xl);
@@ -3816,5 +3797,97 @@
   /* Generated rows sit in a List, so the accent tick needs room inside the row's own inset. */
   .astryx-list-item.is-generated {
     padding-inline-start: var(--spacing-3);
+  }
+}
+
+/*
+ * Dashboard structure pass: individual stat cards, and a readiness gauge that says what it
+ * measures. Spacing and structure only — every colour here is an existing token, and the
+ * emerald accent stays reserved for things the user can act on (the gauge fill is progress
+ * toward a goal, which is why it earns the accent; the stat numbers do not).
+ */
+@layer system {
+  .stat-card {
+    /* Card already supplies surface, border, radius, and --shadow-low from the theme. */
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard);
+  }
+
+  .stat-card:hover {
+    border-color: var(--color-border-emphasized);
+    box-shadow: var(--shadow-med);
+  }
+
+  .stat-card-icon {
+    display: inline-flex;
+    color: var(--color-text-secondary);
+  }
+
+  .stat-card-icon svg {
+    width: var(--spacing-4);
+    height: var(--spacing-4);
+  }
+
+  /* Only a count that means something gets a tone; the rest stay neutral. */
+  .stat-card[data-tone="warning"] .stat-card-icon {
+    color: var(--color-icon-red);
+  }
+
+  .stat-card[data-tone="warning"] .stat-card-value {
+    color: var(--color-text-red);
+  }
+
+  .stat-card-value {
+    color: var(--color-text-primary);
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-3xl);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+  }
+
+  /* Readiness gauge: score, then the bar it sits on, then what it is scored against. */
+  .readiness-block {
+    max-width: calc(var(--spacing-12) * 11);
+  }
+
+  .readiness-score {
+    color: var(--color-text-primary);
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-4xl);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .readiness-score-max {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+    letter-spacing: 0;
+  }
+
+  .readiness-gauge {
+    flex: 1 1 calc(var(--spacing-12) * 4);
+    min-width: calc(var(--spacing-12) * 3);
+  }
+
+  /*
+   * ProgressBar's default track is --color-background-muted, which is the same value as the
+   * band this gauge sits on, so the unfilled portion disappeared into the background.
+   * --color-track exists for exactly this and reads as a real remaining-capacity rail.
+   */
+  .readiness-gauge .astryx-progressbar-track {
+    background: var(--color-track);
+  }
+
+  .workbench-meta-row {
+    row-gap: var(--spacing-1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stat-card {
+      transition: none;
+    }
   }
 }

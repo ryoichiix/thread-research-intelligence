@@ -121,11 +121,16 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
   const sideNav = (
     <SideNav
       header={
+        /*
+         * Wordmark only. The project name lives in the top-bar switcher a few pixels away, so
+         * repeating it here duplicated the one piece of state on screen and truncated badly.
+         * The "RESEARCH INTELLIGENCE" superheading went with it: it is landing-page positioning
+         * copy that carries no in-app meaning, and a three-line brand block for a one-word
+         * product crowded the nav it sits above.
+         */
         <SideNavHeading
           icon={<BrandMark compact />}
-          superheading="RESEARCH INTELLIGENCE"
           heading="THREAD"
-          subheading={activeProject?.title ?? "Research desk"}
           headingHref="/dashboard"
         />
       }
