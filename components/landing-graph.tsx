@@ -10,9 +10,14 @@ const nodes = [
   { id: "c1", x: 25, y: 23, label: "Faster bounded tasks", kind: "CLAIM", tone: "claim" },
   { id: "c2", x: 76, y: 24, label: "Quality needs review", kind: "CLAIM", tone: "claim" },
   { id: "e1", x: 12, y: 60, label: "18% time reduction", kind: "EVIDENCE", tone: "evidence" },
-  { id: "e2", x: 86, y: 60, label: "No complex-task gain", kind: "CONFLICT", tone: "conflict" },
-  { id: "g1", x: 32, y: 82, label: "Long-term effects", kind: "GAP", tone: "gap" },
-  { id: "s1", x: 68, y: 84, label: "Enterprise evidence", kind: "SOURCE", tone: "source" },
+  { id: "e2", x: 88, y: 50, label: "No complex-task gain", kind: "CONFLICT", tone: "conflict" },
+  /*
+   * The bottom-right quadrant is deliberately left empty: the detail card is anchored there, and
+   * with the old positions it landed straight on top of the SOURCE node. Every corner collided
+   * with some node before this, so the fix is to make clear space rather than pick a better corner.
+   */
+  { id: "g1", x: 24, y: 76, label: "Long-term effects", kind: "GAP", tone: "gap" },
+  { id: "s1", x: 55, y: 74, label: "Enterprise evidence", kind: "SOURCE", tone: "source" },
 ];
 
 const edges = [

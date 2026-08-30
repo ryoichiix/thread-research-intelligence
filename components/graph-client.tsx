@@ -47,13 +47,29 @@ function ThreadNode({ data }: NodeProps<Node<ThreadNodeData>>) {
 }
 
 const nodeTypes = { thread: ThreadNode };
-const kindPositions: Record<GraphNode["kind"], { x: number; y: number }> = {
-  question: { x: 430, y: 20 },
-  claim: { x: 40, y: 220 },
-  gap: { x: 1040, y: 220 },
-  evidence: { x: 40, y: 700 },
-  source: { x: 40, y: 1160 },
-};
+/*
+ * Layout geometry.
+ *
+ * The previous version pinned each kind to a hardcoded origin and gave claims four columns at a
+ * 300px pitch starting at x=40, which put the fourth claim at x=940 — and since a node is up to
+ * 240px wide, its right edge reached 1180, straight through the gap column that started at 1040.
+ * Rows were pitched at 190px while a node with three lines of label plus two of detail is taller
+ * than that, so rows collided vertically too.
+ *
+ * Now each kind gets its own horizontal band, stacked with a gap, and the cell pitch is the node
+ * box plus a gutter. Overlap is impossible by construction rather than by choosing origins that
+ * happen not to collide: a band never shares a row with another band, and within a band the
+ * pitch always exceeds the node's maximum box.
+ */
+const NODE_WIDTH = 240;
+const NODE_MAX_HEIGHT = 180; /* measured ceiling is 174 with 3 label lines + 2 detail lines */
+const COLUMN_GUTTER = 60;
+const ROW_GUTTER = 52;
+const COLUMN_PITCH = NODE_WIDTH + COLUMN_GUTTER;
+const ROW_PITCH = NODE_MAX_HEIGHT + ROW_GUTTER;
+const BAND_GAP = 90;
+const MAX_COLUMNS = 5;
+const BAND_ORDER: GraphNode["kind"][] = ["question", "claim", "gap", "evidence", "source"];
 
 function FlowReset() {
   const flow = useReactFlow();
@@ -107,10 +123,9 @@ export function GraphClient({
   }, [graph.edges]);
 
   const nodes = useMemo(() => {
-    const counters = new Map<GraphNode["kind"], number>();
     const focusLimits: Record<GraphNode["kind"], number> = { question: 1, claim: 8, gap: 5, evidence: 6, source: 4 };
     const focusCounts = new Map<GraphNode["kind"], number>();
-    return graph.nodes
+    const visible = graph.nodes
       .filter((node) => visibleKinds.has(node.kind))
       .filter((node) => `${node.label} ${node.detail}`.toLowerCase().includes(query.toLowerCase()))
       .sort((left, right) => ((connectionCount.get(right.id) ?? 0) - (connectionCount.get(left.id) ?? 0)) || ((right.confidence ?? 0) - (left.confidence ?? 0)))
@@ -120,21 +135,38 @@ export function GraphClient({
         focusCounts.set(node.kind, count + 1);
         return count < focusLimits[node.kind];
       })
-      .map((node) => {
-        const count = counters.get(node.kind) ?? 0;
-        counters.set(node.kind, count + 1);
-        const base = kindPositions[node.kind];
-        const columns = node.kind === "question" ? 1 : node.kind === "gap" ? 2 : 4;
-        return {
+      .reduce<GraphNode[]>((all, node) => { all.push(node); return all; }, []);
+
+    /* Group into bands first: a node's position depends on how many peers precede it. */
+    const byKind = new Map<GraphNode["kind"], GraphNode[]>();
+    for (const node of visible) {
+      const bucket = byKind.get(node.kind);
+      if (bucket) bucket.push(node);
+      else byKind.set(node.kind, [node]);
+    }
+
+    const placed: Node<ThreadNodeData>[] = [];
+    let bandTop = 20;
+    for (const kind of BAND_ORDER) {
+      const bandNodes = byKind.get(kind);
+      if (!bandNodes?.length) continue;
+      const columns = Math.min(MAX_COLUMNS, bandNodes.length);
+      /* Narrow bands centre against the widest one so the graph does not read left-heavy. */
+      const bandLeft = 40 + ((MAX_COLUMNS - columns) * COLUMN_PITCH) / 2;
+      bandNodes.forEach((node, index) => {
+        placed.push({
           id: node.id,
           type: "thread",
           data: { ...node, label: node.label },
           position: {
-            x: base.x + (count % columns) * 300,
-            y: base.y + Math.floor(count / columns) * 190,
+            x: bandLeft + (index % columns) * COLUMN_PITCH,
+            y: bandTop + Math.floor(index / columns) * ROW_PITCH,
           },
-        } satisfies Node<ThreadNodeData>;
+        } satisfies Node<ThreadNodeData>);
       });
+      bandTop += Math.ceil(bandNodes.length / columns) * ROW_PITCH + BAND_GAP;
+    }
+    return placed;
   }, [connectionCount, density, graph.nodes, query, visibleKinds]);
 
   const nodeIds = useMemo(() => new Set(nodes.map((node) => node.id)), [nodes]);

@@ -4500,3 +4500,56 @@
     }
   }
 }
+
+/*
+ * Graph overlap fixes.
+ */
+@layer system {
+  /*
+   * FIX 1 — a fixed width makes the layout's column pitch meaningful. With min/max the box could
+   * be anywhere from 180 to 240 wide, so the 60px gutter was only ever a best case.
+   */
+  .thread-flow-node {
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+  }
+
+  /*
+   * FIX 2 — the card floats above the node field, so it takes the overlay elevation rather than
+   * the resting one, and its background is fully opaque.
+   */
+  .landing-graph-detail {
+    background: var(--color-background-popover);
+    box-shadow: var(--shadow-high);
+    backdrop-filter: none;
+  }
+
+  /*
+   * FIX 4 — the notice sat at --spacing-4 while the source cards beside it use --spacing-3, so it
+   * read as bloated next to them. No min-height is set anywhere, so trimming padding is enough.
+   */
+  .status-banner {
+    padding: var(--spacing-3);
+  }
+}
+
+/*
+ * FIX 3 — truncation tooltips inside the graph.
+ *
+ * Text with maxLines attaches a title and renders an astryx tooltip carrying the full string, so
+ * a long claim produced a tooltip wide enough to reach the nodes above and beside it. Capping it
+ * to the node's own width keeps it inside that node's column, and the offset stops it touching
+ * the card it describes.
+ */
+@layer system {
+  .graph-shell .astryx-tooltip,
+  .react-flow .astryx-tooltip {
+    max-width: 240px;
+    margin-block: var(--spacing-2);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    background: var(--color-background-inverted);
+    box-shadow: var(--shadow-high);
+  }
+}
