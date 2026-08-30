@@ -1,24 +1,45 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { BrandMark } from "@/components/brand-mark";
 
 /*
  * Landing entrance.
  *
- * No persisted "seen" flag of any kind, so it plays on every full document load. It is rendered
- * in the server HTML on purpose — gating the first paint on a client-side check would flash the
- * hero before the panel covered it.
+ * The mark assembles the way the product's own graph does: each segment draws itself along its
+ * length, and each node pops in only once the segment terminating at it has arrived. That is why
+ * the mark is rebuilt here as discrete <path>/<circle> elements rather than reusing BrandMark,
+ * whose single compound path cannot be drawn segment by segment.
  *
- * prefers-reduced-motion is handled in CSS (the panel is display:none) as well as here, where the
- * hold collapses to zero. Doing it in CSS is what removes the flash: a JS check cannot run before
- * first paint.
+ * Segment lengths are exact and hardcoded because every stroke is axis-aligned: dasharray is in
+ * user units, so these hold at any rendered size and need no getTotalLength() at runtime.
  *
- * Durations mirror the motion tokens this theme actually compiles to — fast 110ms, medium 220ms,
- * slow 420ms — not the values in the published docs, which are the design system's defaults.
+ * Timeline (ms from mount):
+ *    0-460  segments draw, staggered 80 apart, 220 each
+ *    0-640  nodes pop as their incoming segment lands
+ *  600-900  wordmark rises
+ *      800  skip control fades in
+ *     1500  dismiss begins
+ * 1500-1900 panel scales out while the hero cross-fades in from 1650
  */
-const HOLD_MS = 1600;
-const EXIT_MS = 420;
+const HOLD_MS = 1500;
+const HOLD_REDUCED_MS = 150;
+const EXIT_MS = 400;
+
+const SEGMENTS = [
+  { d: "M8 7h24", length: 24, delay: 0 },
+  { d: "M8 13h14", length: 14, delay: 80 },
+  { d: "M18 13v20", length: 20, delay: 160 },
+  { d: "M12 33h20", length: 20, delay: 240 },
+];
+
+/* Each node waits for the segment that ends on it. */
+const NODES = [
+  { cx: 8, cy: 7, delay: 0 },
+  { cx: 8, cy: 13, delay: 80 },
+  { cx: 32, cy: 7, delay: 220 },
+  { cx: 18, cy: 33, delay: 380 },
+  { cx: 32, cy: 33, delay: 460 },
+];
 
 export function LandingPreloader() {
   const [phase, setPhase] = useState<"visible" | "leaving" | "done">("visible");
@@ -31,7 +52,7 @@ export function LandingPreloader() {
     if (phase !== "visible") return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
     /* setState lands in the timer callback, never synchronously in the effect body. */
-    const timer = setTimeout(dismiss, reduced ? 0 : HOLD_MS);
+    const timer = setTimeout(dismiss, reduced ? HOLD_REDUCED_MS : HOLD_MS);
     return () => clearTimeout(timer);
   }, [phase, dismiss]);
 
@@ -41,10 +62,7 @@ export function LandingPreloader() {
     return () => clearTimeout(timer);
   }, [phase]);
 
-  /*
-   * The phase is published to the root element so the hero underneath can play its own reveal
-   * off the same signal, instead of both sides hard-coding the same delay.
-   */
+  /* Published to the root so the hero can cross-fade off the same signal. */
   useEffect(() => {
     const root = document.documentElement;
     if (phase === "done") {
@@ -72,7 +90,26 @@ export function LandingPreloader() {
     <div className="preloader" data-state={phase} role="presentation">
       <span className="preloader-glow" aria-hidden="true" />
       <div className="preloader-mark">
-        <BrandMark />
+        <svg className="preloader-glyph" viewBox="0 0 40 40" role="img" aria-label="THREAD">
+          {SEGMENTS.map((segment) => (
+            <path
+              key={segment.d}
+              className="preloader-seg"
+              d={segment.d}
+              style={{ "--seg-len": segment.length, "--seg-delay": `${segment.delay}ms` } as React.CSSProperties}
+            />
+          ))}
+          {NODES.map((node) => (
+            <circle
+              key={`${node.cx}-${node.cy}`}
+              className="preloader-node"
+              cx={node.cx}
+              cy={node.cy}
+              r={2}
+              style={{ "--node-delay": `${node.delay}ms` } as React.CSSProperties}
+            />
+          ))}
+        </svg>
         <span className="preloader-wordmark">THREAD</span>
       </div>
       <button type="button" className="preloader-skip" onClick={dismiss}>

@@ -4272,13 +4272,18 @@
 }
 
 /*
- * Landing entrance and the relocated mark.
+ * Landing entrance.
  *
- * Durations come from the theme's compiled motion tokens (fast 110ms, medium 220ms, slow 420ms).
- * The breathing glow needs a beat far longer than any single token, so it is derived from one
- * rather than hardcoded.
+ * The mark draws itself: every segment animates its own stroke-dashoffset, and every node pops
+ * on its own delay. Animating a single parent's opacity is what makes an entrance like this read
+ * as static, so nothing here is driven from a shared wrapper.
  */
 @layer system {
+  :root {
+    /* The system ships only --ease-standard, which does not overshoot; nodes need a real pop. */
+    --thread-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   .preloader {
     position: fixed;
     z-index: 100;
@@ -4289,7 +4294,6 @@
     transform-origin: center;
   }
 
-  /* Reveal, not a cut: the whole panel pushes past the viewport as it goes. */
   .preloader[data-state="leaving"] {
     pointer-events: none;
     animation: preloader-out var(--duration-slow) var(--ease-standard) forwards;
@@ -4302,10 +4306,9 @@
     border-radius: var(--radius-full);
     background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 62%);
     filter: blur(calc(var(--spacing-12) * 1.5));
-    opacity: 0.5;
     pointer-events: none;
-    /* Keeps the hold from reading as a frozen frame. */
-    animation: preloader-breathe calc(var(--duration-slow) * 6) var(--ease-standard) infinite;
+    /* Runs for as long as the panel is mounted. */
+    animation: preloader-breathe calc(var(--duration-slow) * 6) ease-in-out infinite;
   }
 
   .preloader-mark {
@@ -4314,13 +4317,39 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-4);
-    animation: preloader-mark-in var(--duration-slow) var(--ease-standard) backwards;
   }
 
-  .preloader-mark .brand-mark {
+  .preloader-glyph {
     width: var(--spacing-12);
     height: var(--spacing-12);
+    overflow: visible;
     color: var(--color-text-primary);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--border-width);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Each stroke is hidden by its own dash offset, then drawn down to zero. */
+  .preloader-seg {
+    stroke-dasharray: var(--seg-len);
+    stroke-dashoffset: var(--seg-len);
+    animation: preloader-draw var(--duration-medium) var(--ease-standard) var(--seg-delay) forwards;
+  }
+
+  /*
+   * transform-box: fill-box is what makes an SVG circle scale about its own centre rather than
+   * the viewBox origin — without it the nodes fly in from the corner.
+   */
+  .preloader-node {
+    opacity: 0;
+    fill: currentColor;
+    stroke: none;
+    transform: scale(0.3);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: preloader-node-pop var(--duration-medium-min) var(--thread-ease-pop) var(--node-delay) forwards;
   }
 
   .preloader-wordmark {
@@ -4330,41 +4359,60 @@
     font-weight: var(--font-weight-bold);
     letter-spacing: 0.22em;
     text-indent: 0.22em;
+    animation: preloader-word-in var(--duration-medium-max) var(--ease-standard) 600ms backwards;
   }
 
+  /* FIX 1 — quiet, unlinked, and absent from the opening frames. */
   .preloader-skip {
     position: absolute;
-    inset-block-end: var(--spacing-8);
-    inset-inline-end: var(--spacing-8);
+    inset-block-end: var(--spacing-10);
+    inset-inline-end: var(--spacing-10);
     padding: var(--spacing-2) var(--spacing-3);
     border: 0;
-    border-radius: var(--radius-full);
     background: transparent;
-    color: var(--color-text-secondary);
+    color: var(--color-text-disabled);
     cursor: pointer;
+    font-family: var(--font-family-body);
     font-size: var(--font-size-sm);
-    text-decoration: underline;
-    text-underline-offset: 0.3em;
+    text-decoration: none;
+    animation: preloader-skip-in var(--duration-medium) var(--ease-standard) 800ms backwards;
     transition: color var(--duration-fast) var(--ease-standard);
   }
 
   .preloader-skip:hover {
-    color: var(--color-text-primary);
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
   }
 
-  /* The hero rises into place as the panel lifts, keyed off the same phase signal. */
+  /* The hero starts fading up partway through the panel's exit, so the two cross-dissolve. */
   html[data-preloader="leaving"] .hero-stack {
-    animation: hero-reveal var(--duration-slow) var(--ease-standard) backwards;
+    animation: hero-reveal var(--duration-medium-max) var(--ease-standard) 150ms backwards;
   }
 
-  @keyframes preloader-mark-in {
-    from { opacity: 0; transform: scale(0.85); }
-    to { opacity: 1; transform: scale(1); }
+  @keyframes preloader-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes preloader-node-pop {
+    0% { opacity: 0; transform: scale(0.3); }
+    60% { opacity: 1; transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes preloader-word-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes preloader-skip-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes preloader-breathe {
-    0%, 100% { opacity: 0.38; transform: scale(0.94); }
-    50% { opacity: 0.62; transform: scale(1.06); }
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
   }
 
   @keyframes preloader-out {
@@ -4373,21 +4421,45 @@
   }
 
   @keyframes hero-reveal {
-    from { opacity: 0; transform: scale(0.985); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   /*
-   * Reduced motion: the panel never paints at all, which is why this is CSS rather than a JS
-   * check — JS cannot run before first paint.
+   * FIX 6 — everything arrives finished, the glow holds still, and the only motion left is a
+   * plain opacity cross-fade.
    */
   @media (prefers-reduced-motion: reduce) {
-    .preloader {
-      display: none;
+    .preloader-seg {
+      stroke-dashoffset: 0;
+      animation: none;
     }
 
-    html[data-preloader] .hero-stack {
+    .preloader-node {
+      opacity: 1;
+      transform: none;
       animation: none;
+    }
+
+    .preloader-wordmark,
+    .preloader-skip {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+
+    .preloader-glow {
+      opacity: 0.5;
+      transform: none;
+      animation: none;
+    }
+
+    .preloader[data-state="leaving"] {
+      animation: hero-reveal var(--duration-fast) linear reverse forwards;
+    }
+
+    html[data-preloader="leaving"] .hero-stack {
+      animation: hero-reveal var(--duration-fast) linear backwards;
     }
   }
 
