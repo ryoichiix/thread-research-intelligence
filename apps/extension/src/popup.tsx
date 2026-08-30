@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
-import "@astryxdesign/theme-neutral/theme.css";
+import "../../../lib/thread-studio.css";
 import "./extension.css";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
@@ -12,7 +12,7 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { Theme } from "@astryxdesign/core/theme";
-import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import { threadStudioTheme } from "../../../lib/thread-studio";
 import { getBackendUrl, getThreadProjects } from "./api";
 import { normalizeBackendUrl, PRODUCTION_BACKEND_URL } from "./config";
 
@@ -47,4 +47,4 @@ function Popup() {
   return <section className="extension-root"><VStack gap={4}><header className="extension-header"><HStack justify="between" align="center"><HStack gap={2} align="center"><Logo /><Heading level={1}>THREAD</Heading></HStack><Badge label="CLICK TO CAPTURE" variant="green" /></HStack></header><HStack gap={2} align="center"><StatusDot variant={connected ? "success" : "warning"} label={connected ? "Connected" : "Setup needed"} isPulsing={connected} /><Text>{message}</Text></HStack><Card padding={4}><VStack gap={3}><Text type="supporting" color="secondary">THREAD WEBSITE</Text><input className="extension-native-input" value={backend} onChange={(event) => { setConnected(false); setBackend(event.target.value); }} aria-label="THREAD website URL" /><Button label="Connect and load projects" variant="primary" onClick={connect} width="100%" />{projects.length ? <><Text type="supporting" color="secondary">DEFAULT RESEARCH PAPER</Text><select className="extension-native-input" value={projectId} onChange={(event) => chooseProject(event.target.value)} aria-label="Research project">{projects.map((project) => <option key={project.id} value={project.id}>{project.title}</option>)}</select></> : null}</VStack></Card><HStack gap={2}><Button label="Open THREAD" onClick={() => chrome.tabs.create({ url: `${normalizeBackendUrl(backend)}/dashboard` })} width="100%" /><Button label="Reconnect tab" onClick={reconnectTab} width="100%" /></HStack><Button label="Open side panel" onClick={openPanel} width="100%" /><Text type="supporting" color="secondary">THREAD now learns the backend from any compatible deployment you open. After updating, reconnect the current tab once.</Text></VStack></section>;
 }
 
-createRoot(document.getElementById("root")!).render(<React.StrictMode><Theme theme={neutralTheme} mode="light"><Popup /></Theme></React.StrictMode>);
+createRoot(document.getElementById("root")!).render(<React.StrictMode><Theme theme={threadStudioTheme} mode="light"><Popup /></Theme></React.StrictMode>);

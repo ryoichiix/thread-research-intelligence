@@ -1,3 +1,12 @@
+/*
+ * The side panel shares the web app's theme (lib/thread-studio), so every value here is the
+ * same token the app uses. This file only handles the surfaces the panel adds on top.
+ *
+ * Elevation carries the same meaning as the app:
+ *   --shadow-low   resting surfaces
+ *   --shadow-med   the same surface under pointer or keyboard focus
+ *   --shadow-high  floating overlays
+ */
 :root {
   color-scheme: light;
 }
@@ -7,6 +16,7 @@ body {
   margin: 0;
   color: var(--color-text-primary);
   background: var(--color-background-body);
+  font-family: var(--font-family-body);
 }
 
 .extension-root {
@@ -28,19 +38,61 @@ body {
   stroke-linecap: round;
 }
 
-.extension-selection {
-  margin: 0;
-  padding-inline-start: var(--spacing-3);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: var(--font-size-lg);
-  line-height: 1.5;
-  border-inline-start: calc(var(--border-width) * 2) solid var(--color-border-emphasized);
+/* Same kicker treatment as the app's page and panel eyebrows. */
+.extension-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: var(--spacing-0-5);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
+/*
+ * The captured passage, styled like the app's .detail-quote: an accent rule rather than a
+ * grey one, so the quote reads as the subject of the panel.
+ */
+.extension-selection {
+  margin: 0;
+  padding-inline-start: var(--spacing-4);
+  border-inline-start: calc(var(--border-width) * 3) solid var(--color-accent);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  line-height: 1.5;
+}
+
+/*
+ * Counts read as one object divided by rules, matching SummaryBand in the app rather than
+ * three separate floating cards.
+ */
 .extension-metric-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--spacing-2);
+  gap: 0;
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-surface);
+  box-shadow: var(--shadow-low);
+}
+
+.extension-metric {
+  padding: var(--spacing-3);
+  border-inline-start: var(--border-width) solid var(--color-border);
+}
+
+.extension-metric:first-child {
+  border-inline-start: 0;
+}
+
+.extension-metric-value {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-2xl);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.extension-metric[data-tone="conflict"] .extension-metric-value {
+  color: var(--color-text-accent);
 }
 
 .extension-native-input {
@@ -53,11 +105,59 @@ body {
   background: var(--color-background-surface);
 }
 
+/* Resting card elevation, lifting under the pointer, exactly as the app's surfaces do. */
+.extension-card {
+  box-shadow: var(--shadow-low);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.extension-card:hover {
+  border-color: var(--color-border-emphasized);
+  box-shadow: var(--shadow-med);
+}
+
 .extension-status-success { border-color: var(--color-border-green); }
 .extension-status-warning { border-color: var(--color-border-yellow); }
 .extension-status-error { border-color: var(--color-border-red); }
 
+/*
+ * Model output announces itself the same way it does in the app: a short fade-up plus a quiet
+ * accent tick, so the distinction survives when motion is off.
+ */
+.extension-generated {
+  position: relative;
+  animation: extension-generated-reveal var(--duration-medium) var(--ease-standard) backwards;
+}
+
+.extension-generated::before {
+  position: absolute;
+  inset-block: var(--spacing-3);
+  inset-inline-start: 0;
+  width: calc(var(--border-width) * 2);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  opacity: 0.55;
+  content: "";
+}
+
+@keyframes extension-generated-reveal {
+  from { opacity: 0; transform: translateY(var(--spacing-1-5)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .extension-footer {
   padding-block-start: var(--spacing-4);
   border-top: var(--border-width) solid var(--color-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .extension-card {
+    transition: none;
+  }
+
+  .extension-generated {
+    animation: none;
+  }
 }
