@@ -17,6 +17,22 @@
     font-weight: 100 900;
   }
 
+  @font-face {
+    font-family: "Inter";
+    src: url("/fonts/inter-variable-latin.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 100 900;
+  }
+
+  @font-face {
+    font-family: "Space Grotesk";
+    src: url("/fonts/space-grotesk-variable-latin.woff2") format("woff2");
+    font-display: swap;
+    font-style: normal;
+    font-weight: 300 700;
+  }
+
   :root {
     --thread-content-width: 1240px;
     --thread-reading-width: 720px;
