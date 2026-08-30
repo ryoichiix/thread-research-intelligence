@@ -4007,3 +4007,206 @@
     }
   }
 }
+
+/*
+ * FIX 1/3/5 — top-bar switcher, stat cards on a thread, readiness band.
+ */
+@layer system {
+  /* FIX 1 — the switcher is now a single icon control, so its old column budget is gone. */
+  .workspace-context {
+    width: auto;
+    min-width: 0;
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+
+  /*
+   * FIX 3 — the five counts are strung on a thread. The rule is drawn behind the row at the
+   * cards' vertical centre; the cards are opaque, so it only shows in the gaps between them and
+   * reads as a line running through the set. That is the product's own metaphor, drawn literally.
+   */
+  .stat-thread {
+    position: relative;
+  }
+
+  .stat-thread::before {
+    position: absolute;
+    inset-inline: calc(var(--spacing-4) * -1);
+    top: 50%;
+    height: var(--border-width);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-accent) 38%, transparent) 12%,
+      color-mix(in srgb, var(--color-accent) 38%, transparent) 88%,
+      transparent
+    );
+    content: "";
+  }
+
+  .stat-thread .astryx-grid {
+    position: relative;
+    z-index: 1;
+  }
+
+  /*
+   * A very low-opacity accent tint that steps across the row, so the five cards read as a
+   * related set rather than five identical boxes. Contradictions steps out of the sequence and
+   * takes its semantic colour instead.
+   */
+  .stat-card[data-index="0"] { background: color-mix(in srgb, var(--color-accent) 3%, var(--color-background-card)); }
+  .stat-card[data-index="1"] { background: color-mix(in srgb, var(--color-accent) 5%, var(--color-background-card)); }
+  .stat-card[data-index="2"] { background: color-mix(in srgb, var(--color-accent) 7%, var(--color-background-card)); }
+  .stat-card[data-index="4"] { background: color-mix(in srgb, var(--color-accent) 9%, var(--color-background-card)); }
+
+  .stat-card[data-tone="warning"] {
+    background: color-mix(in srgb, var(--color-border-red) 6%, var(--color-background-card));
+    border-color: color-mix(in srgb, var(--color-border-red) 32%, var(--color-border));
+  }
+
+  /*
+   * FIX 5 — the gauge gets capsule ends and a gradient that lightens toward the leading edge,
+   * so the fill has direction instead of reading as a flat block.
+   */
+  .readiness-gauge .astryx-progressbar,
+  .readiness-gauge .astryx-progressbar-track,
+  .readiness-gauge .astryx-progressbar-fill {
+    border-radius: var(--radius-full);
+  }
+
+  .readiness-gauge .astryx-progressbar-track {
+    background: var(--color-track);
+  }
+
+  .readiness-gauge .astryx-progressbar-fill {
+    background: linear-gradient(
+      90deg,
+      var(--color-accent),
+      color-mix(in srgb, var(--color-accent) 72%, white)
+    );
+  }
+}
+
+/*
+ * FIX 6 — landing hero.
+ *
+ * The headline is the page's whole first impression, so it carries the motion: the tail phrase
+ * blurs out and the next one resolves from blur, which is a cross-dissolve rather than a slide.
+ * Everything else in the hero holds still.
+ */
+@layer system {
+  .landing-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  /* Atmosphere only: a soft accent wash with no edge of its own. */
+  .hero-blob {
+    position: absolute;
+    z-index: -1;
+    inset-block-start: calc(var(--spacing-12) * -2);
+    inset-inline-start: 50%;
+    width: min(115vw, calc(var(--spacing-12) * 10));
+    aspect-ratio: 1;
+    translate: -50% 0;
+    border-radius: var(--radius-full);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 62%);
+    filter: blur(calc(var(--spacing-12) * 1.5));
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .hero-stack {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-headline {
+    max-width: 20ch;
+    margin: 0;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-heading);
+    font-size: clamp(var(--font-size-4xl), 7.5vw, 6rem);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.045em;
+    line-height: 1.02;
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* The cycling tail: italic, accent, underlined — the one moving thing on the page. */
+  .hero-cycle {
+    display: inline-block;
+    color: var(--color-accent);
+    font-style: italic;
+    text-decoration: underline;
+    text-decoration-thickness: calc(var(--border-width) * 2);
+    text-underline-offset: 0.12em;
+    transition:
+      filter var(--duration-medium) var(--ease-standard),
+      opacity var(--duration-medium) var(--ease-standard);
+  }
+
+  .hero-cycle[data-phase="out"] {
+    filter: blur(8px);
+    opacity: 0;
+  }
+
+  .hero-cycle[data-phase="in"] {
+    filter: blur(0);
+    opacity: 1;
+  }
+
+  /* Secondary action reads as a link, not a second button. */
+  .hero-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+    transition: color var(--duration-fast) var(--ease-standard);
+  }
+
+  .hero-text-link:hover {
+    color: var(--color-accent);
+  }
+
+  .hero-text-link svg {
+    width: var(--spacing-4);
+    height: var(--spacing-4);
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-2) var(--spacing-4);
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--spacing-0-5);
+    text-transform: uppercase;
+  }
+
+  .hero-meta span + span::before {
+    margin-inline-end: var(--spacing-4);
+    content: "·";
+  }
+
+  /* The mark sits above the headline as a quiet emblem, not a competing illustration. */
+  .landing-hero .hero-thread {
+    width: min(100%, calc(var(--spacing-12) * 7));
+    opacity: 0.9;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cycle {
+      transition: none;
+      filter: none;
+      opacity: 1;
+    }
+  }
+}

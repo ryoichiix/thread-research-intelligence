@@ -42,11 +42,20 @@ export const threadStudioTheme = defineTheme({
   components: {
     button: {
       base: {
-        borderRadius: "var(--radius-element)",
+        borderRadius: "var(--radius-full)",
         fontWeight: "var(--font-weight-semibold)",
         transition: "transform var(--duration-fast) ease, filter var(--duration-fast) ease, box-shadow var(--duration-fast) ease",
         ":hover": { filter: "contrast(1.05) brightness(1.02)", transform: "translateY(-1px)" },
         ":active": { transform: "translateY(0)" },
+      },
+      "variant:secondary": {
+        backgroundColor: "transparent",
+        borderWidth: "var(--border-width)",
+        borderStyle: "solid",
+        borderColor: "var(--color-border-emphasized)",
+        color: "var(--color-text-primary)",
+        boxShadow: "none",
+        ":hover": { backgroundColor: "var(--color-background-muted)", borderColor: "var(--color-text-secondary)" },
       },
       "size:sm": { padding: "var(--spacing-1-5) var(--spacing-3)" },
       "size:md": { padding: "var(--spacing-2) var(--spacing-3)" },

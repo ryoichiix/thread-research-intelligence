@@ -8,7 +8,7 @@ import { IconButton } from "@astryxdesign/core/IconButton";
 import { Kbd } from "@astryxdesign/core/Kbd";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
-import { Selector } from "@astryxdesign/core/Selector";
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu";
 import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import { TopNav } from "@astryxdesign/core/TopNav";
 import {
@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   Search,
   Settings,
+  Library,
   LogOut,
   Target,
 } from "lucide-react";
@@ -176,15 +177,28 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
       startContent={
         <VStack gap={1} className="workspace-context">
           {projects.length ? (
-            <Selector
-              label="Active research paper"
-              isLabelHidden
-              value={activeProjectId ?? ""}
-              onChange={changeProject}
-              options={projects.map((project) => ({ value: project.id, label: project.title, description: project.researchQuestion }))}
-              hasSearch={projects.length > 5}
-              isLoading={switchingProject}
-              width="100%"
+            /*
+             * Icon + chevron only. The project name is the page's H1 a few pixels below, so
+             * spelling it out here duplicated the largest text on screen. The name still reaches
+             * assistive tech through the trigger's accessible label.
+             */
+            <DropdownMenu
+              button={{
+                label: `Switch research paper — current: ${activeProject?.title ?? "none"}`,
+                icon: <Library />,
+                isIconOnly: true,
+                variant: "ghost",
+                size: "sm",
+                isLoading: switchingProject,
+              }}
+              items={projects.map((project) => ({
+                id: project.id,
+                label: project.title,
+                description: project.researchQuestion,
+                onClick: () => changeProject(project.id),
+              }))}
+              menuWidth={320}
+              alignment="start"
             />
           ) : <Text weight="semibold" maxLines={1}>{activeProject?.title ?? "Create your first research project"}</Text>}
           {shellError ? <Text type="supporting" color="secondary" className="workspace-error">{shellError}</Text> : null}

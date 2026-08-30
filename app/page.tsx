@@ -8,8 +8,9 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { TopNav, TopNavHeading, TopNavItem } from "@astryxdesign/core/TopNav";
-import { ArrowRight, PanelRightOpen, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
+import { HeroHeadline } from "@/components/hero-headline";
 import { HeroThread } from "@/components/hero-thread";
 import { LandingGraph } from "@/components/landing-graph";
 
@@ -37,24 +38,35 @@ export default function LandingPage() {
     <AppShell topNav={topNav} height="auto" variant="surface" contentPadding={0}>
       <VStack>
         <section className="landing-hero">
-          <VStack gap={8} align="center">
+          <span className="hero-blob" aria-hidden="true" />
+          <VStack gap={8} align="center" className="hero-stack">
             <HeroThread />
             <HStack gap={2} align="center">
               <StatusDot variant="success" label="Production ready" isPulsing />
               <Text type="supporting" color="secondary">RESEARCH INTELLIGENCE, NOT ANOTHER NOTE APP</Text>
             </HStack>
-            <VStack gap={4} align="center" maxWidth="900px">
-              <Heading level={1} type="display-1" justify="center">Your research should remember what you read.</Heading>
+            <VStack gap={5} align="center" maxWidth="1000px">
+              <HeroHeadline />
               <Text className="hero-copy" justify="center">
                 Turn scattered sources into a living evidence graph that connects claims, exposes contradictions,
                 reveals knowledge gaps, and shows you what to investigate next.
               </Text>
             </VStack>
-            <HStack gap={3} wrap="wrap" justify="center">
+            {/* One solid action, one quiet one — not two buttons of equal weight. */}
+            <HStack gap={5} wrap="wrap" justify="center" align="center">
               <Button label="Start research" href="/onboarding" variant="primary" size="lg" endContent={<ArrowRight />} />
-              <Button label="Download extension" href="/thread-extension.zip" size="lg" icon={<PanelRightOpen />} />
-              <Button label="Open workspace" href="/dashboard" size="lg" variant="ghost" />
+              <a className="hero-text-link" href="/dashboard">
+                Open workspace
+                <ArrowRight />
+              </a>
             </HStack>
+            <p className="hero-meta">
+              <span>Six-step research loop</span>
+              <span>Evidence graph</span>
+              <span>Contradiction radar</span>
+              <span>Browser capture</span>
+              <span>Est. 2026</span>
+            </p>
             <LandingGraph />
           </VStack>
         </section>

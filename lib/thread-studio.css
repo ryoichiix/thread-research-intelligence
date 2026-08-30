@@ -295,10 +295,10 @@
   }
 
   .astryx-button {
-    border-radius: var(--radius-element);
+    border-radius: var(--radius-full);
     font-weight: var(--font-weight-semibold);
     transition: transform var(--duration-fast) ease, filter var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
-    --_button-radius: var(--radius-element);
+    --_button-radius: var(--radius-full);
   }
 
   .astryx-button:hover:where(:not(:disabled,[aria-disabled="true"])) {
@@ -308,6 +308,20 @@
 
   .astryx-button:active {
     transform: translateY(0);
+  }
+
+  .astryx-button.secondary {
+    background-color: transparent;
+    border-width: var(--border-width);
+    border-style: solid;
+    border-color: var(--color-border-emphasized);
+    color: var(--color-text-primary);
+    box-shadow: none;
+  }
+
+  .astryx-button.secondary:hover:where(:not(:disabled,[aria-disabled="true"])) {
+    background-color: var(--color-background-muted);
+    border-color: var(--color-text-secondary);
   }
 
   .astryx-button.sm {

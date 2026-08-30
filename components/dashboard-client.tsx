@@ -243,6 +243,7 @@ export function DashboardClient({
             * Contradictions takes a tone, and only when there is actually something to resolve —
             * colouring all five would make the signal meaningless.
             */}
+          <section className="stat-thread">
           <Grid columns={{ minWidth: 150, max: 5, repeat: "fit" }} gap={3} aria-label="Research inventory">
             {([
               { label: "Sources", value: summary.counts.sources, icon: <FileText /> },
@@ -250,8 +251,8 @@ export function DashboardClient({
               { label: "Claims", value: summary.counts.claims, icon: <CheckCircle2 /> },
               { label: "Contradictions", value: summary.counts.conflicts, icon: <AlertTriangle />, tone: summary.counts.conflicts > 0 ? "warning" : undefined },
               { label: "Open gaps", value: summary.counts.gaps, icon: <SearchX /> },
-            ] satisfies Array<{ label: string; value: number; icon: React.ReactNode; tone?: "warning" }>).map((stat) => (
-              <Card key={stat.label} padding={4} className="stat-card" data-tone={stat.tone}>
+            ] satisfies Array<{ label: string; value: number; icon: React.ReactNode; tone?: "warning" }>).map((stat, index) => (
+              <Card key={stat.label} padding={4} className="stat-card" data-tone={stat.tone} data-index={index}>
                 <VStack gap={2}>
                   <span className="stat-card-icon" aria-hidden="true">{stat.icon}</span>
                   <VStack gap={0}>
@@ -262,6 +263,7 @@ export function DashboardClient({
               </Card>
             ))}
           </Grid>
+          </section>
           </VStack>
         </VStack>
       </Section>
@@ -272,13 +274,13 @@ export function DashboardClient({
         * measure, shows the score against its 100-point scale on a gauge, and keeps the
         * "what it is scored against" line and the limiting factor visible without a hover.
         */}
-      <Section variant="muted" padding={6} dividers={["bottom"]}>
+      <Section variant="muted" paddingInline={6} paddingBlock={8} dividers={["bottom"]}>
         <HStack justify="between" align="end" gap={6} wrap="wrap" className="workbench-condition">
           <VStack gap={2} className="readiness-block">
             <HStack gap={2} align="center" wrap="wrap">
               <Text weight="semibold">Research readiness</Text>
-              <StatusDot variant={summary.health.isComplete ? "success" : "warning"} label={readinessLabels[summary.health.stage]} />
-              <Text type="supporting" color="secondary">{readinessLabels[summary.health.stage]}</Text>
+              {/* The stage reads as a status chip now, not loose text beside a dot. */}
+              <Badge label={readinessLabels[summary.health.stage]} variant={summary.health.isComplete ? "green" : "yellow"} />
             </HStack>
             <HStack gap={3} align="center">
               <Text className="readiness-score">{summary.health.overall}<span className="readiness-score-max">/100</span></Text>
