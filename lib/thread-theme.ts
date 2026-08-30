@@ -3,28 +3,27 @@ import { defineTheme } from "@astryxdesign/core/theme";
 export const threadStudioTheme = defineTheme({
   name: "thread-studio",
   color: {
-    accent: "#1D6B4C",
+    accent: "#12355B",
     neutralStyle: "cool",
     contrast: "high",
   },
   tokens: {
-    // IMPORTANT: --color-accent is set explicitly here, not left to color.accent alone.
-    // color.accent is only a seed the system can nudge for contrast — verify after building that
-    // getComputedStyle(document.documentElement).getPropertyValue('--color-accent') actually
-    // returns #1D6B4C and not some auto-adjusted nearby shade. If it doesn't match exactly, that
-    // is a blocking problem, not a cosmetic one — stop and fix it before moving on.
-    "--color-accent": ["#1D6B4C", "#1D6B4C"],
-    "--color-background-body": ["#FCFCFA", "#FCFCFA"],
+    // --color-accent is pinned explicitly rather than left to the color.accent seed, which the
+    // system is free to nudge for contrast. Verify after building that
+    // getComputedStyle(document.documentElement).getPropertyValue('--color-accent') resolves to
+    // exactly #12355B. One accent only — no second blue, no teal as a general-purpose accent.
+    "--color-accent": ["#12355B", "#12355B"],
+    "--color-background-body": ["#F8FAFC", "#F8FAFC"],
     "--color-background-surface": ["#FFFFFF", "#FFFFFF"],
     "--color-background-card": ["#FFFFFF", "#FFFFFF"],
     "--color-background-popover": ["#FFFFFF", "#FFFFFF"],
-    "--color-background-muted": ["#EEF0EA", "#EEF0EA"],
-    "--color-text-primary": ["#13201A", "#13201A"],
-    "--color-text-secondary": ["#59695F", "#59695F"],
-    "--color-text-disabled": ["#9AA79D", "#9AA79D"],
-    "--color-border": ["#E2E6DD", "#E2E6DD"],
-    "--color-border-emphasized": ["#B7C2B0", "#B7C2B0"],
-    "--color-track": ["#E5E8DF", "#E5E8DF"],
+    "--color-background-muted": ["#EEF2F6", "#EEF2F6"],
+    "--color-text-primary": ["#1E293B", "#1E293B"],
+    "--color-text-secondary": ["#64748B", "#64748B"],
+    "--color-text-disabled": ["#9AA7B8", "#9AA7B8"],
+    "--color-border": ["#E2E8F0", "#E2E8F0"],
+    "--color-border-emphasized": ["#C7D1DE", "#C7D1DE"],
+    "--color-track": ["#E2E8F0", "#E2E8F0"],
   },
   typography: {
     scale: { base: 15, ratio: 1.2 },

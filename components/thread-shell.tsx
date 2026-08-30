@@ -205,7 +205,9 @@ export function ThreadShell({ children, email, projects, activeProjectId }: { ch
         </VStack>
       }
       endContent={
-        <HStack gap={3} align="center">
+        // gap={6} = --spacing-6 (24px). At 12px the search trigger, the account line, and the
+        // primary action ran together as one undifferentiated cluster.
+        <HStack gap={6} align="center">
           <Button
             className="top-search-action"
             label="Search"
