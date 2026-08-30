@@ -23,6 +23,33 @@ export interface SelectionContext {
   references: SourceReference[];
 }
 
+/**
+ * Minimum length a selection must reach before THREAD will act on it. Shared so the
+ * injected page script, the background action guard, and the tests cannot drift apart.
+ */
+export const MIN_SELECTION_LENGTH = 8;
+
+export function normalizeSelectionText(value: string | null | undefined) {
+  return (value ?? "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Decides which of two candidate strings is the real selection.
+ *
+ * The injected script reports whatever `window.getSelection()` holds on the page right now;
+ * `fallback` is the text a caller already knew about (the context-menu path supplies
+ * `info.selectionText`, the side-panel path supplies nothing). Prefer the live selection once
+ * it is substantial enough to act on, otherwise defer to the caller's text, and only return a
+ * too-short live selection when there is no caller text to fall back to — the length guard in
+ * runAction then produces the same "select a specific claim" message either way.
+ */
+export function resolveSelectedText(liveSelection: string | null | undefined, fallback: string | null | undefined) {
+  const live = normalizeSelectionText(liveSelection);
+  if (live.length >= MIN_SELECTION_LENGTH) return live;
+  const passed = normalizeSelectionText(fallback);
+  return passed || live;
+}
+
 export interface ExtensionState {
   status: "idle" | "loading" | "success" | "warning" | "error";
   action?: ExtensionAction;

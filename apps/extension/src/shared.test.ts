@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readThreadJson } from "./api";
-import { actionEndpoint, createEvidencePayload, selectionFingerprint } from "./shared";
+import { MIN_SELECTION_LENGTH, actionEndpoint, createEvidencePayload, resolveSelectedText, selectionFingerprint } from "./shared";
 
 describe("extension capture functionality", () => {
   it("maps selection provenance into the evidence API payload", () => {
@@ -50,5 +50,46 @@ describe("extension capture functionality", () => {
       status: 200,
       headers: { "Content-Type": "application/json" },
     }))).resolves.toEqual({ ok: true });
+  });
+});
+
+describe("selection resolution", () => {
+  /*
+   * The regression this pins: the injected page script used to echo the string handed to
+   * pageContext() straight back as selectedText. The side-panel buttons ("Save selected
+   * evidence" / "Explain selection" / "Verify selection") send no text at all, so selectedText
+   * was always "" and runAction's length guard rejected every click, while the context-menu
+   * path kept working because it supplies info.selectionText.
+   */
+  it("uses the live page selection even when the caller passes nothing", () => {
+    expect(resolveSelectedText("Remote work raised throughput by 18%.", "")).toBe("Remote work raised throughput by 18%.");
+  });
+
+  it("keeps the caller's text when the page reports no live selection", () => {
+    expect(resolveSelectedText("", "Context menu captured this claim.")).toBe("Context menu captured this claim.");
+  });
+
+  it("prefers a substantial live selection over the caller's text", () => {
+    expect(resolveSelectedText("The live selection on the page.", "Stale text.")).toBe("The live selection on the page.");
+  });
+
+  it("falls back to the caller's text when the live selection is too short to act on", () => {
+    expect(resolveSelectedText("see", "Context menu captured this claim.")).toBe("Context menu captured this claim.");
+  });
+
+  it("collapses whitespace so the length guard measures real characters", () => {
+    expect(resolveSelectedText("  Remote   work\n raised throughput.  ", "")).toBe("Remote work raised throughput.");
+  });
+
+  it("returns an empty string when neither source has a selection", () => {
+    expect(resolveSelectedText(undefined, undefined)).toBe("");
+    expect(resolveSelectedText(null, null)).toBe("");
+  });
+
+  it("only accepts a live selection at or above the shared minimum length", () => {
+    const belowMinimum = "a".repeat(MIN_SELECTION_LENGTH - 1);
+    const atMinimum = "a".repeat(MIN_SELECTION_LENGTH);
+    expect(resolveSelectedText(belowMinimum, "caller text")).toBe("caller text");
+    expect(resolveSelectedText(atMinimum, "caller text")).toBe(atMinimum);
   });
 });

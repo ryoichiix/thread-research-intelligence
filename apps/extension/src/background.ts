@@ -1,6 +1,6 @@
 import { callThread, fetchThread, getThreadProjects, readThreadJson, type ExtensionProject } from "./api";
 import { migrateLegacyBackend, normalizeBackendUrl } from "./config";
-import { selectionFingerprint, type ExtensionAction, type ExtensionState, type SelectionContext } from "./shared";
+import { MIN_SELECTION_LENGTH, resolveSelectedText, selectionFingerprint, type ExtensionAction, type ExtensionState, type SelectionContext } from "./shared";
 
 const menuItems: Array<{ id: ExtensionAction; title: string }> = [
   { id: "save", title: "SAVE TO THREAD" },
@@ -70,6 +70,9 @@ async function pageContext(tab: chrome.tabs.Tab, selectedText: string): Promise<
     args: [selectedText],
     func: (selection: string) => {
       const chosen = window.getSelection();
+      // The page's own live selection, reported verbatim. pageContext() decides below whether
+      // this or the passed-in `selection` is the one to act on.
+      const liveSelection = chosen?.toString().replace(/\s+/g, " ").trim() || "";
       let context = selection;
       if (chosen && chosen.rangeCount > 0) {
         const container = chosen.getRangeAt(0).commonAncestorContainer;
@@ -88,7 +91,7 @@ async function pageContext(tab: chrome.tabs.Tab, selectedText: string): Promise<
       const host = location.hostname.toLowerCase();
       const documentType = journal ? "journal_article" : /arxiv|biorxiv|medrxiv|ssrn/.test(host) ? "preprint" : document.contentType.includes("pdf") || /\.pdf(?:$|[?#])/.test(location.href) ? "pdf" : /\.gov$|\.gov\./.test(host) ? "government_report" : /docs\.|\/docs\//.test(`${host}${location.pathname}`) ? "documentation" : /blog|medium|substack/.test(`${host}${location.pathname}`) ? "blog_post" : "webpage";
       return {
-        selectedText: selection,
+        selectedText: liveSelection,
         surroundingContext: context,
         pageTitle: meta("citation_title", "bepress_citation_title", "og:title", "DC.title") || document.title,
         url: document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href || location.href,
@@ -110,7 +113,8 @@ async function pageContext(tab: chrome.tabs.Tab, selectedText: string): Promise<
     },
   });
     if (!result) throw new Error("THREAD could not read the selected page context.");
-    return result as SelectionContext;
+    const context = result as SelectionContext;
+    return { ...context, selectedText: resolveSelectedText(context.selectedText, selectedText) };
   } catch {
     const url = tab.url || "https://unknown.invalid/";
     return { selectedText, surroundingContext: selectedText, pageTitle: tab.title || "Browser document", url, hostname: (() => { try { return new URL(url).hostname; } catch { return ""; } })(), author: "", authors: [], publicationDate: "", documentType: /\.pdf(?:$|[?#])/i.test(url) ? "pdf" : "unknown", publisher: "", journal: "", doi: url.match(/10\.\d{4,9}\/[-._;()/:a-z0-9]+/i)?.[0] || "", citationCount: null, referenceCount: null, citedByUrl: "", pdfUrl: /\.pdf(?:$|[?#])/i.test(url) ? url : "", metadataProvider: "browser_document", references: [] };
@@ -124,7 +128,7 @@ async function setState(state: ExtensionState) {
 async function runAction(action: ExtensionAction, tab: chrome.tabs.Tab, selectionText?: string) {
   if (!tab.id) throw new Error("No active tab is available.");
   const context = await pageContext(tab, selectionText || "");
-  if (context.selectedText.trim().length < 8) throw new Error("Select a specific claim before using THREAD.");
+  if (context.selectedText.trim().length < MIN_SELECTION_LENGTH) throw new Error("Select a specific claim before using THREAD.");
   await setState({ status: "loading", action, selection: context, message: action === "save" ? "Analyzing evidence…" : action === "verify" ? "Checking for conflicts…" : "Explaining with research context…", updatedAt: new Date().toISOString() });
   await chrome.action.setBadgeText({ text: "…", tabId: tab.id });
   const result = await callThread(action, context);
