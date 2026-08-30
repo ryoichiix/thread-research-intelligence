@@ -4272,7 +4272,11 @@
 }
 
 /*
- * FIX 3 — landing entrance, and the section the hero diagram moved into.
+ * Landing entrance and the relocated mark.
+ *
+ * Durations come from the theme's compiled motion tokens (fast 110ms, medium 220ms, slow 420ms).
+ * The breathing glow needs a beat far longer than any single token, so it is derived from one
+ * rather than hardcoded.
  */
 @layer system {
   .preloader {
@@ -4282,15 +4286,15 @@
     display: grid;
     place-items: center;
     background: var(--color-background-body);
-    animation: preloader-in var(--duration-fast) var(--ease-standard);
+    transform-origin: center;
   }
 
+  /* Reveal, not a cut: the whole panel pushes past the viewport as it goes. */
   .preloader[data-state="leaving"] {
     pointer-events: none;
-    animation: preloader-out 420ms var(--ease-standard) forwards;
+    animation: preloader-out var(--duration-slow) var(--ease-standard) forwards;
   }
 
-  /* Soft accent glow, the same atmospheric treatment the hero uses. */
   .preloader-glow {
     position: absolute;
     width: min(90vw, calc(var(--spacing-12) * 12));
@@ -4300,6 +4304,8 @@
     filter: blur(calc(var(--spacing-12) * 1.5));
     opacity: 0.5;
     pointer-events: none;
+    /* Keeps the hold from reading as a frozen frame. */
+    animation: preloader-breathe calc(var(--duration-slow) * 6) var(--ease-standard) infinite;
   }
 
   .preloader-mark {
@@ -4308,7 +4314,7 @@
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-4);
-    animation: preloader-mark-in var(--duration-medium) var(--ease-standard) backwards;
+    animation: preloader-mark-in var(--duration-slow) var(--ease-standard) backwards;
   }
 
   .preloader-mark .brand-mark {
@@ -4346,20 +4352,43 @@
     color: var(--color-text-primary);
   }
 
-  @keyframes preloader-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  /* Lifts away rather than cutting: the panel fades while scaling just past the viewport. */
-  @keyframes preloader-out {
-    from { opacity: 1; transform: scale(1); }
-    to { opacity: 0; transform: scale(1.04); }
+  /* The hero rises into place as the panel lifts, keyed off the same phase signal. */
+  html[data-preloader="leaving"] .hero-stack {
+    animation: hero-reveal var(--duration-slow) var(--ease-standard) backwards;
   }
 
   @keyframes preloader-mark-in {
-    from { opacity: 0; transform: scale(0.96); }
+    from { opacity: 0; transform: scale(0.85); }
     to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes preloader-breathe {
+    0%, 100% { opacity: 0.38; transform: scale(0.94); }
+    50% { opacity: 0.62; transform: scale(1.06); }
+  }
+
+  @keyframes preloader-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.05); }
+  }
+
+  @keyframes hero-reveal {
+    from { opacity: 0; transform: scale(0.985); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /*
+   * Reduced motion: the panel never paints at all, which is why this is CSS rather than a JS
+   * check — JS cannot run before first paint.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .preloader {
+      display: none;
+    }
+
+    html[data-preloader] .hero-stack {
+      animation: none;
+    }
   }
 
   /* The relocated mark, with the room it did not have in the hero. */
@@ -4370,5 +4399,32 @@
   .landing-mark .hero-thread {
     width: min(100%, calc(var(--spacing-12) * 10));
     margin-inline: auto;
+  }
+}
+
+/*
+ * FIX 2 — the landing nav action. Outline at rest so it does not compete with the solid primary
+ * in the hero, filling to solid accent on hover so it has a state of its own.
+ */
+@layer system {
+  .nav-cta {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+
+  .nav-cta:hover {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-cta {
+      transition: none;
+    }
   }
 }

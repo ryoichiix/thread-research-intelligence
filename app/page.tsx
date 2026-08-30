@@ -5,7 +5,6 @@ import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
-import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { TopNav, TopNavHeading, TopNavItem } from "@astryxdesign/core/TopNav";
 import { ArrowRight, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
@@ -29,7 +28,7 @@ export default function LandingPage() {
       }
       endContent={
         <HStack gap={2} align="center">
-          <Button label="Sign in" href="/login" variant="primary" endContent={<ArrowRight />} />
+          <Button className="nav-cta" label="Sign in" href="/login" variant="secondary" endContent={<ArrowRight />} />
         </HStack>
       }
     />
@@ -42,10 +41,7 @@ export default function LandingPage() {
         <section className="landing-hero">
           <span className="hero-blob" aria-hidden="true" />
           <VStack gap={8} align="center" className="hero-stack">
-            <HStack gap={2} align="center">
-              <StatusDot variant="accent" label="Production ready" isPulsing />
-              <Text type="supporting" color="secondary">RESEARCH INTELLIGENCE, NOT ANOTHER NOTE APP</Text>
-            </HStack>
+            <Text type="supporting" color="secondary">RESEARCH INTELLIGENCE, NOT ANOTHER NOTE APP</Text>
             <VStack gap={5} align="center" maxWidth="1000px">
               <HeroHeadline />
               <Text className="hero-copy" justify="center">
