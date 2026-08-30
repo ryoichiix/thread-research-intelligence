@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
-import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { ArrowRight, BookOpen, Check, GitCompareArrows, Scale, ShieldAlert } from "lucide-react";
+import { PageIntro, SummaryBand } from "@/components/page-shell";
 import type { Conflict, ConflictResolutionChoice, Evidence } from "@thread/shared";
 
 const decisionOptions: Array<{
@@ -102,6 +102,7 @@ export function ConflictsClient({ conflicts, evidence }: { conflicts: Conflict[]
   const byId = useMemo(() => new Map(evidence.map((item) => [item.id, item])), [evidence]);
   const unresolved = localConflicts.filter((item) => item.resolution === "unresolved").length;
   const resolved = localConflicts.length - unresolved;
+  const resolutionPercent = localConflicts.length ? Math.round((resolved / localConflicts.length) * 100) : 0;
 
   const selectConflict = (id: string) => {
     setSelectedId(id);
@@ -141,38 +142,22 @@ export function ConflictsClient({ conflicts, evidence }: { conflicts: Conflict[]
 
   return (
     <VStack gap={0} className="resolution-desk">
-      <header className="resolution-header">
-        <VStack gap={5}>
-          <HStack justify="between" align="end" gap={6} wrap="wrap">
-            <VStack gap={2} maxWidth="760px">
-              <HStack gap={2} align="center">
-                <ShieldAlert />
-                <Text type="supporting" weight="semibold" className="page-eyebrow">DECISION DESK / CONTRADICTIONS</Text>
-              </HStack>
-              <Heading level={1} type="display-3">Resolve what the evidence cannot.</Heading>
-              <Text className="page-question">Compare both positions, record your reasoning, and turn an unresolved clash into an explicit research decision.</Text>
-            </VStack>
-            <Button label="Investigate before deciding" href="/next" endContent={<ArrowRight />} size="sm" />
-          </HStack>
-          <HStack gap={5} align="center" wrap="wrap" className="resolution-summary">
-            <VStack gap={1}>
-              <Text className="resolution-summary-value">{unresolved}</Text>
-              <Text type="supporting" color="secondary">Open decisions</Text>
-            </VStack>
-            <VStack gap={1}>
-              <Text className="resolution-summary-value">{resolved}</Text>
-              <Text type="supporting" color="secondary">Finalized</Text>
-            </VStack>
-            <VStack gap={2} className="resolution-progress">
-              <HStack justify="between" gap={4}>
-                <Text type="supporting" color="secondary">Resolution progress</Text>
-                <Text type="supporting" weight="semibold">{localConflicts.length ? Math.round((resolved / localConflicts.length) * 100) : 0}%</Text>
-              </HStack>
-              <ProgressBar value={localConflicts.length ? (resolved / localConflicts.length) * 100 : 0} label="Resolution progress" />
-            </VStack>
-          </HStack>
-        </VStack>
-      </header>
+      <PageIntro
+        crumbs={[{ label: "Evidence", href: "/graph" }, { label: "Contradictions" }]}
+        eyebrow="DECISION DESK / CONTRADICTIONS"
+        icon={<ShieldAlert />}
+        title="Resolve what the evidence cannot."
+        question="Compare both positions, record your reasoning, and turn an unresolved clash into an explicit research decision."
+        actions={<Button label="Investigate before deciding" href="/next" endContent={<ArrowRight />} size="sm" />}
+      />
+      <SummaryBand
+        label="Contradiction summary"
+        stats={[
+          { label: "Open decisions", value: unresolved, detail: "Awaiting your judgement", emphasis: unresolved > 0 },
+          { label: "Finalized", value: resolved, detail: "Recorded with a rationale" },
+          { label: "Resolution", value: `${resolutionPercent}%`, detail: "Of all detected contradictions" },
+        ]}
+      />
 
       <section className="resolution-workspace">
         <aside className="resolution-queue" aria-label="Contradiction queue">

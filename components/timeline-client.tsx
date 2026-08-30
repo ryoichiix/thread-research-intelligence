@@ -10,13 +10,32 @@ import { Text } from "@astryxdesign/core/Text";
 import { Activity, ArrowRight } from "lucide-react";
 import type { Evidence, TimelineEvent } from "@thread/shared";
 import { DetailPanel } from "@/components/detail-panel";
+import { PageIntro, SummaryBand } from "@/components/page-shell";
 
 export function TimelineClient({ timeline, evidence }: { timeline: TimelineEvent[]; evidence: Evidence[] }) {
   const [selected, setSelected] = useState<TimelineEvent | null>(null);
   const byId = new Map(evidence.map((item) => [item.id, item]));
+  const linkedEvidenceCount = timeline.filter((event) => event.evidenceIds.length > 0).length;
+  const latest = timeline[timeline.length - 1];
+  const latestLabel = latest ? new Date(latest.occurredAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "—";
   return (
     <VStack gap={8}>
-      <header className="page-header"><VStack gap={4}><HStack gap={2} align="center"><Activity /><Text type="supporting" color="secondary" className="page-eyebrow">RESEARCH TIMELINE</Text><Badge label={`${timeline.length} INFLECTION POINTS`} /></HStack><Heading level={1} type="display-3">Understanding is allowed to change.</Heading><Text className="page-question">Follow the moments when evidence strengthened a claim, exposed a contradiction, lowered confidence, or created a new research task.</Text></VStack></header>
+      <PageIntro
+        crumbs={[{ label: "Output" }, { label: "Activity log" }]}
+        eyebrow="RESEARCH TIMELINE"
+        icon={<Activity />}
+        title="Understanding is allowed to change."
+        question="Follow the moments when evidence strengthened a claim, exposed a contradiction, lowered confidence, or created a new research task."
+        actions={<Button label="See what to investigate next" href="/next" variant="primary" size="sm" endContent={<ArrowRight />} />}
+      />
+      <SummaryBand
+        label="Activity summary"
+        stats={[
+          { label: "Recorded changes", value: timeline.length, emphasis: true },
+          { label: "Evidence linked", value: linkedEvidenceCount, detail: "Events with a source item" },
+          { label: "Latest change", value: latestLabel, detail: timeline.length ? timeline[timeline.length - 1]?.title : "Nothing recorded yet" },
+        ]}
+      />
       <ol className="timeline-list">
         {timeline.map((event) => (
           <li key={event.id}>

@@ -9,6 +9,7 @@ import { HStack, VStack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { ArrowUpRight, Compass, Search } from "lucide-react";
 import { DetailPanel } from "@/components/detail-panel";
+import { PageIntro, SummaryBand } from "@/components/page-shell";
 import type { ResearchTask } from "@thread/shared";
 
 interface SearchResult {
@@ -35,6 +36,8 @@ export function NextResearchClient({ tasks, projectId }: { tasks: ResearchTask[]
   const [message, setMessage] = useState("");
   const [decisions, setDecisions] = useState<Record<string, "saved" | "rejected">>({});
   const [decisionPending, setDecisionPending] = useState<string | null>(null);
+  const highValueCount = tasks.filter((task) => task.expectedValue === "High").length;
+  const evidenceOnHand = tasks.reduce((total, task) => total + task.evidenceAvailable, 0);
 
   const investigate = async (task: ResearchTask) => {
     setActive(task);
@@ -78,13 +81,23 @@ export function NextResearchClient({ tasks, projectId }: { tasks: ResearchTask[]
 
   return (
     <VStack gap={8}>
-      <header className="page-header">
-        <VStack gap={4}>
-          <HStack gap={2} align="center"><Compass /><Text type="supporting" color="secondary" className="page-eyebrow">WHAT SHOULD YOU INVESTIGATE NEXT?</Text><Badge label="RANKED BY EXPECTED VALUE" variant="blue" /></HStack>
-          <Heading level={1} type="display-3">Turn uncertainty into a research plan.</Heading>
-          <Text className="page-question">Each task is derived from current coverage, conflicts, and missing evidence—not a generic reading list.</Text>
-        </VStack>
-      </header>
+      <PageIntro
+        crumbs={[{ label: "Output" }, { label: "Next moves" }]}
+        eyebrow="WHAT SHOULD YOU INVESTIGATE NEXT?"
+        icon={<Compass />}
+        title="Turn uncertainty into a research plan."
+        question="Each task is derived from current coverage, conflicts, and missing evidence—not a generic reading list."
+        actions={<Button label="Review knowledge gaps" href="/gaps" size="sm" />}
+      />
+      <SummaryBand
+        label="Research plan summary"
+        stats={[
+          { label: "Ranked tasks", value: tasks.length, emphasis: true },
+          { label: "High value", value: highValueCount, detail: "Most likely to move readiness" },
+          { label: "Evidence on hand", value: evidenceOnHand, detail: "Across every ranked task" },
+          { label: "Top priority", value: tasks[0] ? "01" : "—", detail: tasks[0]?.title },
+        ]}
+      />
       <section aria-label="Ranked research tasks">
         {tasks.map((task, index) => (
           <article className="task-row" key={task.id}>

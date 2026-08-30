@@ -11,19 +11,34 @@ import { Text } from "@astryxdesign/core/Text";
 import { ArrowRight, CircleHelp, Search } from "lucide-react";
 import type { ResearchGap } from "@thread/shared";
 import { DetailPanel } from "@/components/detail-panel";
+import { PageIntro, SummaryBand } from "@/components/page-shell";
 
 export function GapsClient({ gaps }: { gaps: ResearchGap[] }) {
   const [selected, setSelected] = useState<ResearchGap | null>(null);
   const largest = gaps.find((gap) => gap.isLargest) ?? gaps[0];
+  const coverages = gaps.map((gap) => gap.coverage).sort((a, b) => a - b);
+  const weakestCoverage = coverages[0] ?? 0;
+  const medianCoverage = coverages.length ? coverages[Math.floor(coverages.length / 2)] : 0;
+  const gapEvidenceCount = gaps.reduce((total, gap) => total + gap.evidenceCount, 0);
   return (
     <VStack gap={8}>
-      <header className="page-header">
-        <VStack gap={4}>
-          <HStack gap={2} align="center"><CircleHelp /><Text type="supporting" color="secondary" className="page-eyebrow">KNOWLEDGE GAPS</Text><Badge label={`${gaps.length} ACTIVE`} variant="yellow" /></HStack>
-          <Heading level={1} type="display-3">The empty spaces matter.</Heading>
-          <Text className="page-question">Coverage is only useful when it reveals what is missing: populations, time periods, outcomes, methods, and unresolved findings.</Text>
-        </VStack>
-      </header>
+      <PageIntro
+        crumbs={[{ label: "Evidence", href: "/graph" }, { label: "Knowledge gaps" }]}
+        eyebrow="KNOWLEDGE GAPS"
+        icon={<CircleHelp />}
+        title="The empty spaces matter."
+        question="Coverage is only useful when it reveals what is missing: populations, time periods, outcomes, methods, and unresolved findings."
+        actions={<Button label="Plan the next inquiry" href="/next" variant="primary" size="sm" endContent={<ArrowRight />} />}
+      />
+      <SummaryBand
+        label="Coverage summary"
+        stats={[
+          { label: "Open gaps", value: gaps.length, emphasis: true },
+          { label: "Weakest coverage", value: `${weakestCoverage}%`, detail: largest?.topic },
+          { label: "Median coverage", value: `${medianCoverage}%`, detail: "Across all tracked topics" },
+          { label: "Evidence on gaps", value: gapEvidenceCount, detail: "Items touching a tracked gap" },
+        ]}
+      />
       {largest ? (
         <Card variant="yellow" padding={6}>
           <Grid columns={{ minWidth: 300, max: 2, repeat: "fit" }} gap={8} align="center">

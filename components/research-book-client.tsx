@@ -18,6 +18,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { BookOpen, Download, Search, Trash2 } from "lucide-react";
 import type { Evidence, ResearchDataset } from "@thread/shared";
 import { DetailPanel } from "@/components/detail-panel";
+import { PageIntro, SummaryBand } from "@/components/page-shell";
 
 const tabs = ["overview", "sources", "evidence", "claims", "relations", "insights", "conflicts", "gaps", "tasks", "timeline", "graph"] as const;
 type TabName = (typeof tabs)[number];
@@ -83,11 +84,28 @@ export function ResearchBookClient({ dataset, initialQuery = "", focusSearch = f
 
   return (
     <VStack gap={6}>
-      <header className="page-header">
+      <PageIntro
+        crumbs={[{ label: "Output" }, { label: "Research library" }]}
+        eyebrow="RESEARCH BOOK"
+        icon={<BookOpen />}
+        title="The record behind the conclusions."
+        question="Inspect every source, excerpt, claim, relationship, conflict, gap, task, and change in understanding."
+        actions={<Button label="Download structured report" href={`/api/reports/${dataset.project.id}`} icon={<Download />} variant="primary" size="sm" />}
+      />
+      <SummaryBand
+        label="Library summary"
+        stats={[
+          { label: "Sources", value: dataset.sources.length },
+          { label: "Evidence", value: dataset.evidence.length, emphasis: true },
+          { label: "Claims", value: dataset.claims.length },
+          { label: "Contradictions", value: dataset.conflicts.length },
+          { label: "Open gaps", value: dataset.gaps.length },
+        ]}
+      />
+      <header className="page-header library-filters">
         <VStack gap={4}>
           <HStack justify="between" align="end" gap={6} wrap="wrap">
-            <VStack gap={2}><HStack gap={2} align="center"><BookOpen /><Text type="supporting" color="secondary" className="page-eyebrow">RESEARCH BOOK</Text></HStack><Heading level={1} type="display-3">The record behind the conclusions.</Heading><Text className="page-question">Inspect every source, excerpt, claim, relationship, conflict, gap, task, and change in understanding.</Text></VStack>
-            <VStack gap={2} align="end"><TextInput ref={searchRef} label="Global research search" value={query} onChange={setQuery} placeholder="Search everything…" startIcon={<Search />} hasClear width={280} /><Button label="Download structured report" href={`/api/reports/${dataset.project.id}`} icon={<Download />} variant="primary" /></VStack>
+            <VStack gap={2} align="end"><TextInput ref={searchRef} label="Global research search" value={query} onChange={setQuery} placeholder="Search everything…" startIcon={<Search />} hasClear width={280} /></VStack>
           </HStack>
           <HStack gap={3} wrap="wrap" align="end">
             <label className="field-label">Source type<select className="native-select" value={sourceType} onChange={(event) => setSourceType(event.target.value)}><option value="all">All types</option>{sourceTypeOptions.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>

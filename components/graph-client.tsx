@@ -28,6 +28,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Filter, RotateCcw, Search } from "lucide-react";
 import type { Evidence, GraphAnalysis, GraphEdge, GraphNode } from "@thread/shared";
 import { DetailPanel } from "@/components/detail-panel";
+import { PageIntro, SummaryBand } from "@/components/page-shell";
 
 type ThreadNodeData = GraphNode & { label: string } & Record<string, unknown>;
 
@@ -162,16 +163,24 @@ export function GraphClient({
 
   return (
     <VStack gap={6}>
-      <header className="page-header">
+      <PageIntro
+        crumbs={[{ label: "Evidence", href: "/graph" }, { label: "Evidence map" }]}
+        eyebrow="KNOWLEDGE GRAPH"
+        title="Evidence has a shape."
+        question="Sources become evidence, evidence supports claims, conflicts expose boundary conditions, and gaps generate the next question."
+        actions={<TextInput label="Search graph" isLabelHidden value={query} onChange={setQuery} placeholder="Find nodes…" startIcon={<Search />} hasClear width={280} />}
+      />
+      <SummaryBand
+        label="Graph summary"
+        stats={[
+          { label: "Nodes", value: graph.nodes.length, detail: "Questions, claims, evidence, gaps" },
+          { label: "Links", value: graph.edges.length, detail: "Typed relationships" },
+          { label: "Opposing links", value: graph.analysis.contradictionCount, detail: "Claims that disagree", emphasis: graph.analysis.contradictionCount > 0 },
+          { label: "Components", value: graph.analysis.connectedComponents, detail: "Disconnected clusters" },
+        ]}
+      />
+      <header className="page-header graph-controls">
         <VStack gap={4}>
-          <HStack justify="between" gap={6} align="end" wrap="wrap">
-            <VStack gap={2} maxWidth="760px">
-              <HStack gap={2} align="center"><Text type="supporting" color="secondary" className="page-eyebrow">KNOWLEDGE GRAPH</Text><Badge label="LIVE RELATIONSHIPS" variant="blue" /></HStack>
-              <Heading level={1} type="display-3">Evidence has a shape.</Heading>
-              <Text className="page-question">Sources become evidence, evidence supports claims, conflicts expose boundary conditions, and gaps generate the next question.</Text>
-            </VStack>
-            <TextInput label="Search graph" isLabelHidden value={query} onChange={setQuery} placeholder="Find nodes…" startIcon={<Search />} hasClear width={300} />
-          </HStack>
           <HStack gap={2} align="center" wrap="wrap">
             <Filter />
             <Button label="Focus strongest" variant={density === "focus" ? "primary" : "secondary"} size="sm" onClick={() => setDensity("focus")} />

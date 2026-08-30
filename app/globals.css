@@ -3607,3 +3607,198 @@
     }
   }
 }
+
+/*
+ * Step 4 — page template and visual system.
+ *
+ * Elevation has one meaning across the app:
+ *   --shadow-low   resting surfaces that sit on the page (cards, rows, the summary band)
+ *   --shadow-med   the same surface under the pointer or keyboard focus
+ *   --shadow-high  surfaces floating above the page (detail panel, command palette, dialogs)
+ * Nothing resting uses --shadow-high, and nothing floating uses --shadow-low.
+ */
+@layer system {
+  .page-intro {
+    padding: var(--spacing-2) 0 var(--spacing-5);
+    border-bottom: var(--border-width) solid var(--color-border-emphasized);
+  }
+
+  .page-intro .astryx-breadcrumbs {
+    margin-block-end: var(--spacing-1);
+  }
+
+  .page-intro-actions {
+    padding-block-end: var(--spacing-1);
+  }
+
+  /* Dense stat row. Cells are separated by rules, not gaps, so the band reads as one object. */
+  .summary-band {
+    margin-block: var(--spacing-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-container);
+    overflow: hidden;
+    background: var(--color-background-surface);
+    box-shadow: var(--shadow-low);
+  }
+
+  .summary-cell {
+    padding: var(--spacing-4) var(--spacing-5);
+    border-inline-start: var(--border-width) solid var(--color-border);
+  }
+
+  .summary-cell:first-child {
+    border-inline-start: 0;
+  }
+
+  .summary-cell-label {
+    text-transform: uppercase;
+    letter-spacing: var(--spacing-0-5);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .summary-cell-value {
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-3xl);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  .summary-cell[data-emphasis="true"] .summary-cell-value {
+    color: var(--color-text-accent);
+  }
+
+  /*
+   * Interaction feel, applied once to the recurring surface classes rather than per page.
+   * Fast token only: these fire constantly, and anything slower reads as lag.
+   */
+  .summary-band,
+  .task-row,
+  .timeline-row,
+  .evidence-row,
+  .record-list article,
+  .astryx-card {
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      box-shadow var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .task-row:hover,
+  .timeline-row:hover,
+  .evidence-row:hover,
+  .astryx-card:hover,
+  .task-row:focus-visible,
+  .timeline-row:focus-visible,
+  .evidence-row:focus-visible {
+    border-color: var(--color-border-emphasized);
+    box-shadow: var(--shadow-med);
+  }
+
+  /*
+   * Generated content announces itself. Insights and synthesized findings are model output,
+   * not stored facts, so they fade up on a slight delay — enough to read as "produced" rather
+   * than as part of the page furniture, without becoming a spinner.
+   */
+  .is-generated {
+    animation: generated-reveal var(--duration-medium) var(--ease-standard) backwards;
+  }
+
+  .is-generated::before {
+    /* A quiet accent tick, so the distinction survives without motion too. */
+    position: absolute;
+    inset-block: var(--spacing-3);
+    inset-inline-start: 0;
+    width: calc(var(--border-width) * 2);
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    opacity: 0.55;
+    content: "";
+  }
+
+  .is-generated {
+    position: relative;
+  }
+
+  .is-generated:nth-child(2) { animation-delay: 50ms; }
+  .is-generated:nth-child(3) { animation-delay: 100ms; }
+  .is-generated:nth-child(4) { animation-delay: 150ms; }
+  .is-generated:nth-child(n + 5) { animation-delay: 200ms; }
+
+  @keyframes generated-reveal {
+    from { opacity: 0; transform: translateY(var(--spacing-1-5)); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 720px) {
+    .summary-cell {
+      border-inline-start: 0;
+      border-block-start: var(--border-width) solid var(--color-border);
+    }
+
+    .summary-cell:first-child {
+      border-block-start: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .summary-band,
+    .task-row,
+    .timeline-row,
+    .evidence-row,
+    .record-list article,
+    .astryx-card {
+      transition: none;
+    }
+
+    .is-generated {
+      animation: none;
+    }
+  }
+}
+
+/*
+ * Step 4, continued — reconcile the shared template with the per-page headers that survive
+ * beneath it (graph controls, library filters). Only the PageIntro draws the rule under the
+ * title; the strips below it are control surfaces, not headers.
+ */
+@layer system {
+  .page-header.graph-controls,
+  .page-header.library-filters {
+    padding-block: 0 var(--spacing-4);
+    border-bottom: 0;
+  }
+
+  /* The dashboard's inventory strip is the same object as SummaryBand, so it reads the same. */
+  .workbench-facts {
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-container);
+    overflow: hidden;
+    background: var(--color-background-surface);
+    box-shadow: var(--shadow-low);
+  }
+
+  .workbench-fact {
+    flex: 1 1 calc(var(--spacing-12) * 3);
+    padding: var(--spacing-4) var(--spacing-5);
+    border-inline-start: var(--border-width) solid var(--color-border);
+  }
+
+  .workbench-fact:first-child {
+    border-inline-start: 0;
+  }
+
+  .workbench-fact-value {
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-3xl);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+  }
+
+  /* Generated rows sit in a List, so the accent tick needs room inside the row's own inset. */
+  .astryx-list-item.is-generated {
+    padding-inline-start: var(--spacing-3);
+  }
+}

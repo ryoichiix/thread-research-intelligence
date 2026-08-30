@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@astryxdesign/core/Badge";
+import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
@@ -205,6 +206,10 @@ export function DashboardClient({
     <VStack gap={0} className="research-workbench">
       <Section padding={6} dividers={["bottom"]}>
         <VStack gap={6}>
+          <Breadcrumbs variant="supporting" label="Research brief location">
+            <BreadcrumbItem>Workspace</BreadcrumbItem>
+            <BreadcrumbItem isCurrent>Research brief</BreadcrumbItem>
+          </Breadcrumbs>
           <HStack justify="between" align="start" gap={6} wrap="wrap">
             <VStack gap={2} maxWidth="820px">
               <HStack gap={3} align="center" wrap="wrap">
@@ -276,6 +281,7 @@ export function DashboardClient({
                     return (
                       <ListItem
                         key={insight.id}
+                        className="is-generated"
                         label={insight.title}
                         onClick={() => setSelectedInsight(insight)}
                         startContent={<Text className="workbench-row-index">{String(index + 1).padStart(2, "0")}</Text>}
