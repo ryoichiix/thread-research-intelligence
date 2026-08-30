@@ -310,6 +310,14 @@
     transform: translateY(0);
   }
 
+  .astryx-button.sm {
+    padding: var(--spacing-1-5) var(--spacing-3);
+  }
+
+  .astryx-button.md {
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+
   .astryx-button.primary {
     background-image: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 100%, white 10%), var(--color-accent));
     box-shadow: var(--shadow-low);
@@ -340,11 +348,13 @@
     color: var(--color-text-disabled);
     font-family: var(--font-family-code);
     letter-spacing: 0.08em;
+    margin-block-end: var(--spacing-4);
   }
 
   .astryx-side-nav-item {
     border-radius: var(--radius-element);
-    padding: var(--spacing-3) var(--spacing-4);
+    padding: var(--spacing-4) var(--spacing-5);
+    margin-block-end: var(--spacing-1-5);
     transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
   }
 
@@ -360,7 +370,7 @@
   }
 
   .astryx-side-nav-section {
-    margin-block-start: var(--spacing-6);
+    margin-block-start: var(--spacing-8);
   }
 
   .astryx-selector {

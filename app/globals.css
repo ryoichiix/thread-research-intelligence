@@ -3891,3 +3891,119 @@
     }
   }
 }
+
+/*
+ * Landing hero centerpiece, plus the decorative-colour audit.
+ *
+ * The brass tone below is the one complementary accent in the system. It is reserved for the
+ * page kicker/eyebrow line and nothing else: the emerald stays the action colour, and the
+ * green/red status badges stay semantic and untouched.
+ */
+@layer system {
+  :root {
+    --thread-brass: #9A7B3F;
+  }
+
+  .hero-thread {
+    width: min(100%, calc(var(--spacing-12) * 9));
+    margin-inline: auto;
+  }
+
+  .hero-thread-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero-thread-ring {
+    stroke: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    stroke-width: var(--border-width);
+  }
+
+  .hero-thread-line path {
+    stroke: color-mix(in srgb, var(--color-accent) 32%, transparent);
+    stroke-width: calc(var(--border-width) * 1.5);
+  }
+
+  .hero-thread-line circle {
+    fill: var(--color-background-body);
+    stroke: color-mix(in srgb, var(--color-accent) 42%, transparent);
+    stroke-width: calc(var(--border-width) * 1.5);
+  }
+
+  .hero-thread-line.is-accent path {
+    stroke: var(--color-accent);
+  }
+
+  .hero-thread-line.is-accent circle {
+    fill: var(--color-accent);
+    stroke: var(--color-accent);
+  }
+
+  .hero-thread-mark path {
+    stroke: var(--color-text-primary);
+    stroke-width: calc(var(--border-width) * 2.5);
+  }
+
+  .hero-thread-mark circle {
+    fill: var(--color-text-primary);
+    stroke: none;
+  }
+
+  /*
+   * Threads draw themselves in once, from the mark outward, so the eye follows the connection
+   * rather than arriving at a finished diagram. The mark itself never moves.
+   */
+  .hero-thread-line path {
+    stroke-dasharray: 260;
+    stroke-dashoffset: 260;
+    animation: hero-thread-draw var(--duration-slow) var(--ease-standard) forwards;
+  }
+
+  .hero-thread-line circle {
+    animation: hero-thread-node var(--duration-medium) var(--ease-standard) backwards;
+    animation-delay: var(--duration-slow);
+  }
+
+  @keyframes hero-thread-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes hero-thread-node {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /*
+   * FIX 5a — the landing graph's dot grid was drawn in --color-border-emphasized, a palette
+   * token but a flat structural one. A faint accent tint ties the decoration to the brand
+   * without competing with the nodes sitting on top of it.
+   */
+  .landing-graph {
+    background-image:
+      radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) var(--border-width), transparent var(--border-width));
+  }
+
+  /*
+   * FIX 5b — the single reserved use of the brass tone: the document-identity kicker on the
+   * research brief header. Deliberately not .page-eyebrow or .workbench-kicker at large — those
+   * classes repeat on every section label and on pages outside this pass, and a second colour
+   * appearing seven times is a palette, not a highlight.
+   */
+  .workbench-kicker-brand {
+    color: var(--thread-brass);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-thread-line path,
+    .hero-thread-line circle {
+      animation: none;
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
+}

@@ -48,6 +48,8 @@ export const threadStudioTheme = defineTheme({
         ":hover": { filter: "contrast(1.05) brightness(1.02)", transform: "translateY(-1px)" },
         ":active": { transform: "translateY(0)" },
       },
+      "size:sm": { padding: "var(--spacing-1-5) var(--spacing-3)" },
+      "size:md": { padding: "var(--spacing-2) var(--spacing-3)" },
       "variant:primary": {
         backgroundImage: "linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 100%, white 10%), var(--color-accent))",
         boxShadow: "var(--shadow-low)",
@@ -57,12 +59,14 @@ export const threadStudioTheme = defineTheme({
     card: { base: { borderRadius: "var(--radius-element)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-low)" } },
     badge: { base: { borderRadius: "var(--radius-full)" } },
     "side-nav": { base: { backgroundColor: "var(--color-background-surface)", borderColor: "var(--color-border)" } },
-    "side-nav-heading": { base: { color: "var(--color-text-disabled)", fontFamily: "var(--font-family-code)", letterSpacing: "0.08em" } },
+    "side-nav-heading": { base: { color: "var(--color-text-disabled)", fontFamily: "var(--font-family-code)", letterSpacing: "0.08em", marginBlockEnd: "var(--spacing-4)" } },
     "side-nav-item": {
       base: {
         borderRadius: "var(--radius-element)",
-        // Comfortable click target; --spacing-3/-4 are the scale steps nearest the 12/14px target.
-        padding: "var(--spacing-3) var(--spacing-4)",
+        // Roomier on every side than the previous 12/16.
+        padding: "var(--spacing-4) var(--spacing-5)",
+        // Rows in the same group no longer sit flush against each other.
+        marginBlockEnd: "var(--spacing-1-5)",
         transition: "background-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease",
         // Each row is its own rounded rectangle, not a bare text row.
         ":hover": { backgroundColor: "var(--color-background-muted)" },
@@ -70,7 +74,7 @@ export const threadStudioTheme = defineTheme({
       selected: { backgroundColor: "var(--color-accent-muted)", color: "var(--color-text-accent)", boxShadow: "inset 3px 0 0 var(--color-accent)", fontWeight: "var(--font-weight-semibold)" },
     },
     // Group blocks sit roughly twice as far apart as the items inside them.
-    "side-nav-section": { base: { marginBlockStart: "var(--spacing-6)" } },
+    "side-nav-section": { base: { marginBlockStart: "var(--spacing-8)" } },
     selector: { base: { borderRadius: "var(--radius-element)" } },
     "top-nav": { base: { backgroundColor: "var(--color-background-surface)", borderColor: "var(--color-border)" } },
   },

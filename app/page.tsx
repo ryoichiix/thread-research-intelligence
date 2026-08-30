@@ -10,6 +10,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { TopNav, TopNavHeading, TopNavItem } from "@astryxdesign/core/TopNav";
 import { ArrowRight, PanelRightOpen, ScanSearch, ShieldCheck, Sparkles } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
+import { HeroThread } from "@/components/hero-thread";
 import { LandingGraph } from "@/components/landing-graph";
 
 export default function LandingPage() {
@@ -37,6 +38,7 @@ export default function LandingPage() {
       <VStack>
         <section className="landing-hero">
           <VStack gap={8} align="center">
+            <HeroThread />
             <HStack gap={2} align="center">
               <StatusDot variant="success" label="Production ready" isPulsing />
               <Text type="supporting" color="secondary">RESEARCH INTELLIGENCE, NOT ANOTHER NOTE APP</Text>

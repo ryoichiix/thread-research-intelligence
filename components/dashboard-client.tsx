@@ -206,20 +206,28 @@ export function DashboardClient({
   return (
     <VStack gap={0} className="research-workbench">
       {/* Compact eyebrow/meta zone: it introduces the title, it is not a section of its own. */}
-      <Section paddingInline={6} paddingBlockStart={3} paddingBlockEnd={5} dividers={["bottom"]}>
+      <Section paddingInline={8} paddingBlockStart={4} paddingBlockEnd={6} dividers={["bottom"]}>
         <VStack gap={5}>
           <Breadcrumbs variant="supporting" label="Research brief location">
             <BreadcrumbItem>Workspace</BreadcrumbItem>
             <BreadcrumbItem isCurrent>Research brief</BreadcrumbItem>
           </Breadcrumbs>
+          {/*
+            * Stats stay stacked under the title rather than sitting inline beside it: five cards
+            * need ~750px, which leaves the title block nothing to work with at 1440 and collapses
+            * entirely below it. Instead the gap between title and stats is tightened so the two
+            * read as one header unit — the GitHub repo-header treatment rather than Linear's
+            * two-or-three inline metrics, which is the pattern that actually fits five.
+            */}
+          <VStack gap={4}>
           <HStack justify="between" align="start" gap={6} wrap="wrap">
             <VStack gap={1} maxWidth="820px">
               <HStack gap={3} align="center" wrap="wrap" className="workbench-meta-row">
-                <Text type="supporting" weight="semibold" className="workbench-kicker">WORKING PAPER</Text>
+                <Text type="supporting" weight="semibold" className="workbench-kicker workbench-kicker-brand">WORKING PAPER</Text>
                 <Text type="supporting" color="secondary">FILE {summary.project.id.slice(0, 8).toUpperCase()}</Text>
                 <Text type="supporting" color="secondary">UPDATED {updatedLabel.toUpperCase()}</Text>
               </HStack>
-              <Heading level={1} type="display-3">{summary.project.title}</Heading>
+              <Heading level={1} type="display-2">{summary.project.title}</Heading>
               <Text className="workbench-question">{summary.project.researchQuestion}</Text>
             </VStack>
             <HStack gap={2} wrap="wrap">
@@ -254,6 +262,7 @@ export function DashboardClient({
               </Card>
             ))}
           </Grid>
+          </VStack>
         </VStack>
       </Section>
 
@@ -263,7 +272,7 @@ export function DashboardClient({
         * measure, shows the score against its 100-point scale on a gauge, and keeps the
         * "what it is scored against" line and the limiting factor visible without a hover.
         */}
-      <Section variant="muted" padding={5} dividers={["bottom"]}>
+      <Section variant="muted" padding={6} dividers={["bottom"]}>
         <HStack justify="between" align="end" gap={6} wrap="wrap" className="workbench-condition">
           <VStack gap={2} className="readiness-block">
             <HStack gap={2} align="center" wrap="wrap">
@@ -338,7 +347,7 @@ export function DashboardClient({
                 {generationMessage ? <Text type="supporting" color="secondary" className="workbench-note">{generationMessage}</Text> : null}
               </Section>
 
-              <Section id="health" padding={6} dividers={["bottom"]}>
+              <Section id="health" padding={8} dividers={["bottom"]}>
                 <VStack gap={5}>
                   <VStack gap={1}>
                     <Text type="supporting" color="secondary" className="workbench-kicker">RESEARCH MOVEMENT</Text>
